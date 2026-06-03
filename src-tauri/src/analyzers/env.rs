@@ -70,14 +70,3 @@ pub fn analyze_env(project_path: &Path) -> Result<Vec<EnvVariable>, String> {
 
     Ok(extract_env_variables(content))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_envparser() {
-        let path = Path::new("/Users/vishesh/workspace/op/epicenter/apps/api");
-        println!("{:#?}", analyze_env(path));
-    }
-}
