@@ -14,5 +14,5 @@ pub enum ScriptType {
 pub struct ProjectScript {
     pub name: String,
     pub command: String,
-    pub script_type: ScriptType,
+    // pub script_type: ScriptType,
 }

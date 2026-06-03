@@ -3,16 +3,16 @@ use std::path::Path;
 
 use crate::models::repository::{RepositoryInfo, RepositoryType};
 
-fn is_project(path: &Path) -> bool {
-    path.join("package.json").exists()
+fn is_project(project_path: &Path) -> bool {
+    project_path.join("package.json").exists()
 }
 // currently only discover project that have pacakge.json
 
-fn is_monorepo(path: &Path) -> bool {
-    path.join("pnpm-workspace.yaml").exists()
-        || path.join("turbo.json").exists()
-        || path.join("nx.json").exists()
-        || path.join("lerna.json").exists()
+fn is_monorepo(project_path: &Path) -> bool {
+    project_path.join("pnpm-workspace.yaml").exists()
+        || project_path.join("turbo.json").exists()
+        || project_path.join("nx.json").exists()
+        || project_path.join("lerna.json").exists()
 }
 
 fn discover_project_paths(root: &Path) -> Vec<String> {
@@ -42,8 +42,8 @@ fn discover_project_paths(root: &Path) -> Vec<String> {
     project_paths
 }
 
-pub fn repository(path: &Path) -> Result<RepositoryInfo, String> {
-    let path = Path::new(&path);
+pub fn repository(project_path: &Path) -> Result<RepositoryInfo, String> {
+    let path = Path::new(&project_path);
 
     if !path.exists() {
         return Err("Directory does not exist".to_string());
