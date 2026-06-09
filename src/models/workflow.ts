@@ -1,3 +1,14 @@
+export type WorkflowBranch =
+  | "onSuccess"
+  | "onFailure"
+  | "onTrue"
+  | "onFalse";
+
+export type WorkflowPath = Array<
+  string | WorkflowBranch
+>;
+
+
 //
 // FLOW
 //
@@ -116,9 +127,9 @@ export interface EnvironmentVariableCheck {
 export interface ConditionStep extends BaseStep {
   type: "condition";
 
-  left: string;
+  variableName: string;
   operator: ConditionOperator;
-  right: string;
+  value: string;
 
   onTrue: Workflow;
   onFalse: Workflow;

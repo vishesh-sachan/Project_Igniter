@@ -138,9 +138,9 @@ pub struct ConditionStep {
     pub id: String,
     pub name: String,
 
-    pub left: String,
+    pub variable_name: String,
     pub operator: ConditionOperator,
-    pub right: String,
+    pub value: String,
 
     pub on_true: Option<Workflow>,
     pub on_false: Option<Workflow>,
