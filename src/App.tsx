@@ -1,9 +1,9 @@
+import WorkflowBuilder from "./pages/WorkflowBuilder";
+
 function App() {
-  return (
-    <main>
-      <h1>Welcome to Project_Installer</h1>
-    </main>
-  );
+  return <div>
+      <WorkflowBuilder />
+    </div>
 }
 
 export default App;
