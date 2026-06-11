@@ -1,20 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-
-#[derive(Debug, Clone, Default)]
-pub struct WorkflowContext {
-    pub variables: HashMap<String, String>,
-}
-
-impl WorkflowContext {
-    pub fn get(&self, key: &str) -> Option<&String> {
-        self.variables.get(key)
-    }
-    
-    pub fn set(&mut self, key: String, value: String) {
-        self.variables.insert(key, value);
-    }
-}
 
 //
 // Flow
@@ -35,6 +19,13 @@ pub struct FlowStep {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Workflow {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub environment: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: String,
+
     pub steps: Vec<Step>,
 }
 

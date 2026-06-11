@@ -5,17 +5,23 @@ import {
   WorkflowPath,
 } from "../models/workflow";
 import {
-    findStepRecursive,
-    updateStepRecursive,
-    deleteStepRecursive,
-    addStepToWorkflow
-}from "./workflowUtils"
+  findStepRecursive,
+  updateStepRecursive,
+  deleteStepRecursive,
+  addStepToWorkflow
+} from "./workflowUtils"
 
 export function useWorkflow() {
-  const [workflow, setWorkflow] =
-    useState<Workflow>({
-      steps: [],
-    });
+  const [workflow, setWorkflow] = useState<Workflow>({
+    id: crypto.randomUUID(),
+    name: "New Workflow",
+    createdAt:
+      new Date().toISOString(),
+    updatedAt:
+      new Date().toISOString(),
+
+    steps: [],
+  });
 
   const [
     selectedStepId,
@@ -23,15 +29,15 @@ export function useWorkflow() {
   ] = useState<string | null>(null);
 
   const selectedStep = useMemo(
-  () =>
-    selectedStepId === null
-      ? null
-      : findStepRecursive(
+    () =>
+      selectedStepId === null
+        ? null
+        : findStepRecursive(
           workflow,
           selectedStepId
         ),
-  [workflow, selectedStepId]
-);
+    [workflow, selectedStepId]
+  );
 
   function selectStep(
     stepId: string | null
@@ -66,26 +72,26 @@ export function useWorkflow() {
   }
 
   function deleteStep(
-  stepId: string
-) {
-  const updatedWorkflow =
-    deleteStepRecursive(
-      workflow,
-      stepId
-    );
-
-  setWorkflow(updatedWorkflow);
-
-  if (
-    selectedStepId &&
-    !findStepRecursive(
-      updatedWorkflow,
-      selectedStepId
-    )
+    stepId: string
   ) {
-    setSelectedStepId(null);
+    const updatedWorkflow =
+      deleteStepRecursive(
+        workflow,
+        stepId
+      );
+
+    setWorkflow(updatedWorkflow);
+
+    if (
+      selectedStepId &&
+      !findStepRecursive(
+        updatedWorkflow,
+        selectedStepId
+      )
+    ) {
+      setSelectedStepId(null);
+    }
   }
-}
 
   return {
     workflow,

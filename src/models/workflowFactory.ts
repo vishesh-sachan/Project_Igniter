@@ -15,8 +15,14 @@ export function createContinueFlowStep(): FlowStep {
     };
 }
 
-export function createEmptyWorkflow(): Workflow {
+function createEmptyWorkflow(): Workflow {
     return {
+        id: crypto.randomUUID(),
+        name: "sub-workflow",
+        createdAt:
+            new Date().toISOString(),
+        updatedAt:
+            new Date().toISOString(),
         steps: [
             createContinueFlowStep(),
         ],

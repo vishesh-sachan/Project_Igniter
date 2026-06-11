@@ -33,6 +33,13 @@ export interface FlowStep extends BaseStep {
 //
 
 export interface Workflow {
+  id: string;
+  name: string;
+  description?: string;
+  environment?: string;
+  createdAt: string;
+  updatedAt: string;
+
   steps: Step[];
 }
 
