@@ -20,9 +20,13 @@ pub fn save_workflow_command(
 #[tauri::command]
 pub fn load_workflow_command(
     project_path: String,
+    workflow_id: String,
 ) -> Result<Workflow, String> {
 
-    load_workflow(&project_path)
+    load_workflow(
+    &project_path,
+    &workflow_id,
+)
 }
 
 #[tauri::command]
