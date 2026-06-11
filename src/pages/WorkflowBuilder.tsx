@@ -58,49 +58,51 @@ export default function WorkflowBuilder({
                 }
             />
 
-            <div className="flex flex-1 overflow-hidden">
-                {variables.length > 0 && (
-                    <aside className="w-72">
-                        <ContextVariablesPanel
+            <div className="flex-1 p-6 overflow-hidden">
+                <div className="h-full flex gap-6">
+                    {variables.length > 0 && (
+                        <aside className="panel w-72 overflow-auto">
+                            <ContextVariablesPanel
+                                variables={variables}
+                            />
+                        </aside>
+                    )}
+
+                    <main className="panel grid-background flex-1 overflow-auto">
+                        <WorkflowTree
+                            workflow={workflowState.workflow}
+                            selectedStepId={
+                                workflowState.selectedStepId
+                            }
+                            selectStep={
+                                workflowState.selectStep
+                            }
+                            addStep={workflowState.addStep}
+                        />
+                    </main>
+
+                    <aside className="panel w-96 overflow-auto">
+                        <div className="panel-header">
+                            Properties
+                        </div>
+
+                        <PropertiesPanel
+                            selectedStep={
+                                workflowState.selectedStep
+                            }
+                            updateStep={
+                                workflowState.updateStep
+                            }
                             variables={variables}
+                            stepReferences={
+                                stepReferences
+                            }
+                            deleteStep={
+                                workflowState.deleteStep
+                            }
                         />
                     </aside>
-                )}
-
-                <main className="grid-background flex-1 overflow-auto">
-                    <WorkflowTree
-                        workflow={workflowState.workflow}
-                        selectedStepId={
-                            workflowState.selectedStepId
-                        }
-                        selectStep={
-                            workflowState.selectStep
-                        }
-                        addStep={workflowState.addStep}
-                    />
-                </main>
-
-                <aside className="panel w-96">
-                    <div className="panel-header">
-                        Properties
-                    </div>
-
-                    <PropertiesPanel
-                        selectedStep={
-                            workflowState.selectedStep
-                        }
-                        updateStep={
-                            workflowState.updateStep
-                        }
-                        variables={variables}
-                        stepReferences={
-                            stepReferences
-                        }
-                        deleteStep={
-                            workflowState.deleteStep
-                        }
-                    />
-                </aside>
+                </div>
             </div>
         </div>
     );
