@@ -14,6 +14,7 @@ pub fn run() {
             commands::workflow_commands::save_workflow_command,
             commands::workflow_commands::load_workflow_command,
             commands::workflow_commands::workflow_exists_command,
+            commands::workflow_commands::list_workflows_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

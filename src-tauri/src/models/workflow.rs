@@ -23,7 +23,7 @@ pub struct Workflow {
     pub name: String,
     pub description: Option<String>,
     pub environment: Option<String>,
-    pub created_at: Option<String>,
+    pub created_at: String,
     pub updated_at: String,
 
     pub steps: Vec<Step>,

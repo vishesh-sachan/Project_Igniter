@@ -1,6 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
-
+use crate::models::workflow_summary::WorkflowSummary;
 use crate::models::workflow::Workflow;
 
 fn project_installer_dir(
@@ -93,4 +93,64 @@ pub fn workflow_exists(
         }
         Err(_) => false,
     }
+}
+
+pub fn list_workflows(
+    project_root: &str,
+) -> Result<
+    Vec<WorkflowSummary>,
+    String,
+> {
+    let workflows_dir =
+        workflows_dir(project_root);
+
+    if !workflows_dir.exists() {
+        return Ok(vec![]);
+    }
+
+    let mut workflows =
+        Vec::new();
+
+    for entry in fs::read_dir(
+        workflows_dir,
+    )
+    .map_err(|e| e.to_string())?
+    {
+        let entry =
+            entry.map_err(|e| e.to_string())?;
+
+        let path = entry.path();
+
+        if !path.is_file() {
+            continue;
+        }
+
+        let contents =
+            fs::read_to_string(&path)
+                .map_err(|e| e.to_string())?;
+
+        let workflow: Workflow =
+            serde_json::from_str(
+                &contents,
+            )
+            .map_err(|e| e.to_string())?;
+
+        workflows.push(
+            WorkflowSummary {
+                id: workflow.id,
+                name: workflow.name,
+                created_at:
+                    workflow.created_at,
+                updated_at:
+                    workflow.updated_at,
+            },
+        );
+    }
+
+    workflows.sort_by(|a, b| {
+        b.updated_at
+            .cmp(&a.updated_at)
+    });
+
+    Ok(workflows)
 }
