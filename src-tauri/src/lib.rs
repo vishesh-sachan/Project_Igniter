@@ -1,8 +1,5 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-mod models;
-mod services;
-mod commands;
 use tauri_plugin_dialog;
+mod persistence;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -10,10 +7,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
-            commands::workflow_commands::save_workflow_command,
-            commands::workflow_commands::load_workflow_command,
-            commands::workflow_commands::workflow_exists_command,
-            commands::workflow_commands::list_workflows_command,
+            persistence::persistence::read_file,
+            persistence::persistence::write_file,
+            persistence::persistence::delete_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
