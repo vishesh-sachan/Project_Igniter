@@ -5,9 +5,10 @@ import {
 
 import {
   listWorkflows,
+  updateWorkflowMetadata,
 } from "../services/workflowService";
 
-import { WorkflowSummary } from "../models/workflow";
+import { WorkflowSummary } from "../features/workflow/types/workflow";
 
 type Props = {
   projectPath: string;
@@ -38,6 +39,9 @@ export default function ProjectOverviewPage({
   const [workflows, setWorkflows] = useState<WorkflowSummary[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -63,6 +67,42 @@ export default function ProjectOverviewPage({
 
     load();
   }, [projectPath]);
+
+  function startEditing() {
+    if (!selectedWorkflow) return;
+    setEditName(selectedWorkflow.name);
+    setEditDescription(selectedWorkflow.description ?? "");
+    setEditing(true);
+  }
+
+  async function saveEditing() {
+    if (!selectedWorkflow) return;
+
+    await updateWorkflowMetadata(
+      projectPath,
+      selectedWorkflow.id,
+      { name: editName, description: editDescription }
+    );
+
+    const updated: WorkflowSummary = {
+      ...selectedWorkflow,
+      name: editName,
+      description: editDescription,
+      updatedAt: new Date().toISOString(),
+    };
+
+    setWorkflows((prev) =>
+      prev.map((w) =>
+        w.id === updated.id ? updated : w
+      )
+    );
+    setSelectedWorkflow(updated);
+    setEditing(false);
+  }
+
+  function cancelEditing() {
+    setEditing(false);
+  }
 
   return (
     <div className="h-screen flex flex-col">
@@ -195,16 +235,22 @@ export default function ProjectOverviewPage({
             {selectedWorkflow && (
               <div className="h-full flex flex-col">
                 <div className="border-b border-[var(--border)] px-6 py-4">
-                  <h1 className="text-2xl font-bold">
-                    {
-                      selectedWorkflow.name
-                    }
-                  </h1>
+                  {editing ? (
+                    <input
+                      className="workflow-input text-2xl font-bold"
+                      value={editName}
+                      onChange={(e) =>
+                        setEditName(e.target.value)
+                      }
+                    />
+                  ) : (
+                    <h1 className="text-2xl font-bold">
+                      {selectedWorkflow.name}
+                    </h1>
+                  )}
 
                   <div className="text-sm text-[var(--muted)] mt-2">
-                    {
-                      projectPath
-                    }
+                    {projectPath}
                   </div>
                 </div>
 
@@ -216,32 +262,38 @@ export default function ProjectOverviewPage({
                       </div>
 
                       <div className="mt-2 text-sm break-all">
-                        {
-                          selectedWorkflow.id
-                        }
+                        {selectedWorkflow.id}
                       </div>
                     </div>
+
                     <div>
                       <div className="property-section-title">
                         DESCRIPTION
                       </div>
 
                       <div className="mt-2 text-sm">
-                        {selectedWorkflow.description ??
-                          "-"}
+                        {editing ? (
+                          <textarea
+                            className="workflow-textarea"
+                            value={editDescription}
+                            onChange={(e) =>
+                              setEditDescription(e.target.value)
+                            }
+                            rows={3}
+                          />
+                        ) : (
+                          selectedWorkflow.description ?? "-"
+                        )}
                       </div>
                     </div>
+
                     <div>
                       <div className="property-section-title">
                         CREATED
                       </div>
 
                       <div className="mt-2 text-sm">
-                        {
-                          formatDate(
-                            selectedWorkflow.createdAt
-                          )
-                        }
+                        {formatDate(selectedWorkflow.createdAt)}
                       </div>
                     </div>
 
@@ -251,31 +303,52 @@ export default function ProjectOverviewPage({
                       </div>
 
                       <div className="mt-2 text-sm">
-                        {
-                          formatDate(
-                            selectedWorkflow.updatedAt
-                          )
-                        }
+                        {formatDate(selectedWorkflow.updatedAt)}
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t border-[var(--border)] p-4 flex gap-2">
-                  <button
-                    className="workflow-button primary"
-                    onClick={() =>
-                      onOpenEditor(
-                        selectedWorkflow.id
-                      )
-                    }
-                  >
-                    Open Editor
-                  </button>
+                  {editing ? (
+                    <>
+                      <button
+                        className="workflow-button primary"
+                        onClick={saveEditing}
+                      >
+                        Save
+                      </button>
 
-                  <button className="workflow-button">
-                    Re-analyze
-                  </button>
+                      <button
+                        className="workflow-button"
+                        onClick={cancelEditing}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="workflow-button primary"
+                        onClick={() =>
+                          onOpenEditor(selectedWorkflow.id)
+                        }
+                      >
+                        Open Editor
+                      </button>
+
+                      <button
+                        className="workflow-button"
+                        onClick={startEditing}
+                      >
+                        Edit
+                      </button>
+
+                      <button className="workflow-button">
+                        Re-analyze
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             )}
