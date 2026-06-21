@@ -42,6 +42,12 @@ function collectRecursive(
         collectRecursive(step.onSuccess, result);
         collectRecursive(step.onFailure, result);
         break;
+
+      case "osBranch":
+        collectRecursive(step.macos, result);
+        collectRecursive(step.linux, result);
+        collectRecursive(step.windows, result);
+        break;
     }
   }
 }
