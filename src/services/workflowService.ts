@@ -32,21 +32,6 @@ function createDefaultIndex(): WorkflowIndex {
   };
 }
 
-function migrateFromOldFormat(old: WorkflowSummary[]): WorkflowIndex {
-  return {
-    schema: 1,
-    defaultProject: "root",
-    standalone: old,
-    projects: {
-      root: {
-        path: ".",
-        defaultEnv: "dev",
-        environments: {},
-      },
-    },
-  };
-}
-
 async function readFile(path: string): Promise<string> {
   return invoke("read_file", { path });
 }
@@ -72,15 +57,7 @@ function workflowToSummary(workflow: Workflow): WorkflowSummary {
 async function loadWorkflowIndex(projectPath: string): Promise<WorkflowIndex> {
   try {
     const contents = await readFile(workflowsIndexPath(projectPath));
-    const parsed = JSON.parse(contents);
-
-    if (Array.isArray(parsed)) {
-      const migrated = migrateFromOldFormat(parsed);
-      await saveWorkflowIndex(projectPath, migrated);
-      return migrated;
-    }
-
-    return parsed as WorkflowIndex;
+    return JSON.parse(contents) as WorkflowIndex;
   } catch {
     return createDefaultIndex();
   }
