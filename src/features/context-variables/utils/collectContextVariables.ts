@@ -49,6 +49,12 @@ function collectFromStep(
             collectFromWorkflow(step.onFailure, variables);
             break;
 
+        case "osBranch":
+            collectFromWorkflow(step.macos, variables);
+            collectFromWorkflow(step.linux, variables);
+            collectFromWorkflow(step.windows, variables);
+            break;
+
         default:
             break;
     }
