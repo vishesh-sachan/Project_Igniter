@@ -27,6 +27,7 @@ interface WorkflowStore {
   addStep: (path: WorkflowPath, step: Step) => void;
   updateStep: (step: Step) => void;
   deleteStep: (stepId: string) => void;
+  updateWorkflowMeta: (meta: { name?: string; environment?: string }) => void;
 }
 
 export const useWorkflowStore = create<WorkflowStore>()((set, get) => ({
@@ -60,5 +61,14 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => ({
           ? null
           : selectedStepId,
     });
+  },
+
+  updateWorkflowMeta: (meta) => {
+    set((state) => ({
+      workflow: touchWorkflow({
+        ...state.workflow,
+        ...meta,
+      }),
+    }));
   },
 }));
