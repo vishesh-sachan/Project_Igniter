@@ -21,6 +21,7 @@ function createDefaultWorkflow(): Workflow {
 interface WorkflowStore {
   workflow: Workflow;
   selectedStepId: string | null;
+  dirty: boolean;
 
   selectStep: (stepId: string | null) => void;
   setWorkflow: (workflow: Workflow) => void;
@@ -28,26 +29,30 @@ interface WorkflowStore {
   updateStep: (step: Step) => void;
   deleteStep: (stepId: string) => void;
   updateWorkflowMeta: (meta: { name?: string; environment?: string }) => void;
+  markClean: () => void;
 }
 
 export const useWorkflowStore = create<WorkflowStore>()((set, get) => ({
   workflow: createDefaultWorkflow(),
   selectedStepId: null,
+  dirty: false,
 
   selectStep: (stepId) => set({ selectedStepId: stepId }),
 
-  setWorkflow: (workflow) => set({ workflow, selectedStepId: null }),
+  setWorkflow: (workflow) => set({ workflow, selectedStepId: null, dirty: false }),
 
   addStep: (path, step) => {
     set((state) => ({
       workflow: touchWorkflow(addStepToWorkflow(state.workflow, path, step)),
       selectedStepId: step.id,
+      dirty: true,
     }));
   },
 
   updateStep: (updatedStep) => {
     set((state) => ({
       workflow: touchWorkflow(updateStepRecursive(state.workflow, updatedStep)),
+      dirty: true,
     }));
   },
 
@@ -56,6 +61,7 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => ({
     const updatedWorkflow = deleteStepRecursive(workflow, stepId);
     set({
       workflow: touchWorkflow(updatedWorkflow),
+      dirty: true,
       selectedStepId:
         selectedStepId && !findStepRecursive(updatedWorkflow, selectedStepId)
           ? null
@@ -69,6 +75,9 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => ({
         ...state.workflow,
         ...meta,
       }),
+      dirty: true,
     }));
   },
+
+  markClean: () => set({ dirty: false }),
 }));

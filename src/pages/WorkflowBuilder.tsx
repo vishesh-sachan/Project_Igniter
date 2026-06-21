@@ -32,10 +32,12 @@ export default function WorkflowBuilder({
         [workflow]
     );
 
+    const markClean = useWorkflowStore((s) => s.markClean);
+
     async function handleSave() {
         try {
             await saveWorkflow(projectPath, workflow);
-            console.log("Workflow saved");
+            markClean();
         } catch (error) {
             console.error("Failed to save workflow", error);
         }

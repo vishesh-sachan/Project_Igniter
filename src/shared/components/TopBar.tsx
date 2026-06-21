@@ -11,6 +11,7 @@ export default function TopBar({
 }: Props) {
   const workflowName = useWorkflowStore((s) => s.workflow.name);
   const workflowEnv = useWorkflowStore((s) => s.workflow.environment);
+  const dirty = useWorkflowStore((s) => s.dirty);
   const updateWorkflowMeta = useWorkflowStore((s) => s.updateWorkflowMeta);
 
   return (
@@ -64,8 +65,9 @@ export default function TopBar({
         <button
           className="workflow-button primary"
           onClick={onSave}
+          disabled={!dirty}
         >
-          Save
+          Save{dirty ? " *" : ""}
         </button>
       </div>
     </header>
