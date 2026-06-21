@@ -184,3 +184,24 @@ export interface WorkflowSummary {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface EnvEntry {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectIndex {
+  path: string;
+  defaultEnv: string;
+  environments: Record<string, EnvEntry>;
+}
+
+export interface WorkflowIndex {
+  schema: number;
+  defaultProject: string;
+  standalone: WorkflowSummary[];
+  projects: Record<string, ProjectIndex>;
+}
