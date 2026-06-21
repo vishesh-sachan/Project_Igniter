@@ -6,6 +6,7 @@ import ContextVariablesPanel from "../features/context-variables/components/Cont
 import { useWorkflowStore } from "../features/workflow/store/useWorkflowStore";
 import { collectContextVariables } from "../features/context-variables/utils/collectContextVariables";
 import { collectWorkflowSteps } from "../features/workflow-list/utils/collectWorkflowSteps";
+import { createWorkflow } from "../features/workflow/factory/workflowFactory";
 import { loadWorkflow, saveWorkflow } from "../services/workflowService";
 
 type Props = {
@@ -42,10 +43,12 @@ export default function WorkflowBuilder({
 
     useEffect(() => {
         async function load() {
-            if (!workflowId) return;
-
-            const loaded = await loadWorkflow(projectPath, workflowId);
-            setWorkflow(loaded);
+            if (workflowId) {
+                const loaded = await loadWorkflow(projectPath, workflowId);
+                setWorkflow(loaded);
+            } else {
+                setWorkflow(createWorkflow());
+            }
         }
 
         load();
