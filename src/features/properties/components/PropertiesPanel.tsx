@@ -10,6 +10,7 @@ import FileProperties from "./FileProperties";
 import FlowProperties from "./FlowProperties";
 import InputProperties from "./InputProperties";
 import InformationProperties from "./InformationProperties";
+import OSBranchProperties from "./OSBranchProperties";
 
 type Props = {
   variables: string[];
@@ -71,6 +72,10 @@ export default function PropertiesPanel({
 
       {selectedStep.type === "flow" && (
         <FlowProperties step={selectedStep} updateStep={updateStep} stepReferences={stepReferences} />
+      )}
+
+      {selectedStep.type === "osBranch" && (
+        <OSBranchProperties step={selectedStep} updateStep={updateStep} />
       )}
 
       <div className="p-4 border-t border-[var(--border)]">
