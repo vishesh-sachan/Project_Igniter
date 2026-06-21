@@ -49,6 +49,7 @@ function workflowToSummary(workflow: Workflow): WorkflowSummary {
     id: workflow.id,
     name: workflow.name,
     description: workflow.description,
+    environment: workflow.environment,
     createdAt: workflow.createdAt,
     updatedAt: workflow.updatedAt,
   };
@@ -114,8 +115,8 @@ export async function listWorkflows(projectPath: string): Promise<WorkflowSummar
   const summaries: WorkflowSummary[] = [...index.standalone];
 
   for (const project of Object.values(index.projects)) {
-    for (const entry of Object.values(project.environments)) {
-      summaries.push(entry);
+    for (const [envName, entry] of Object.entries(project.environments)) {
+      summaries.push({ ...entry, environment: envName });
     }
   }
 

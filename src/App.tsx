@@ -62,13 +62,6 @@ function App() {
               workflowId,
             })
           }
-          onCreateWorkflow={() =>
-            setState({
-              page: "workflowBuilder",
-              projectPath:
-                state.projectPath,
-            })
-          }
         />
       );
 

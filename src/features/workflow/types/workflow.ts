@@ -181,6 +181,7 @@ export interface WorkflowSummary {
   id: string;
   name: string;
   description?: string;
+  environment?: string;
   createdAt: string;
   updatedAt: string;
 }

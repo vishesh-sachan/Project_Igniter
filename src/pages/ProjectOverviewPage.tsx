@@ -5,10 +5,12 @@ import {
 
 import {
   listWorkflows,
+  saveWorkflow,
   updateWorkflowMetadata,
 } from "../services/workflowService";
 
 import { WorkflowSummary } from "../features/workflow/types/workflow";
+import { createWorkflow } from "../features/workflow/factory/workflowFactory";
 
 type Props = {
   projectPath: string;
@@ -18,8 +20,6 @@ type Props = {
   onOpenEditor: (
     workflowId: string
   ) => void;
-
-  onCreateWorkflow: () => void;
 };
 
 function formatDate(
@@ -34,7 +34,6 @@ export default function ProjectOverviewPage({
   projectPath,
   onBack,
   onOpenEditor,
-  onCreateWorkflow
 }: Props) {
   const [workflows, setWorkflows] = useState<WorkflowSummary[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowSummary | null>(null);
@@ -42,6 +41,9 @@ export default function ProjectOverviewPage({
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [createDescription, setCreateDescription] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -104,6 +106,24 @@ export default function ProjectOverviewPage({
     setEditing(false);
   }
 
+  function openCreateModal() {
+    setCreateName("");
+    setCreateDescription("");
+    setShowCreateModal(true);
+  }
+
+  async function handleCreate() {
+    if (!createName.trim()) return;
+
+    const workflow = createWorkflow();
+    workflow.name = createName.trim();
+    workflow.description = createDescription.trim() || undefined;
+
+    await saveWorkflow(projectPath, workflow);
+    setShowCreateModal(false);
+    onOpenEditor(workflow.id);
+  }
+
   return (
     <div className="h-screen flex flex-col">
       <header className="panel h-14 flex items-center justify-between px-4 border-b">
@@ -142,7 +162,7 @@ export default function ProjectOverviewPage({
 
               <button
                 className="workflow-button"
-                onClick={onCreateWorkflow}
+                onClick={openCreateModal}
               >
                 New
               </button>
@@ -180,10 +200,18 @@ export default function ProjectOverviewPage({
                       : "border-[var(--border)]"
                       }`}
                   >
-                    <div className="font-medium">
-                      {
-                        workflow.name
-                      }
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium">
+                        {
+                          workflow.name
+                        }
+                      </div>
+
+                      {workflow.environment && (
+                        <span className="text-xs uppercase tracking-wide text-[var(--accent)] border border-[var(--accent)] rounded px-1.5 py-0.5 leading-none">
+                          {workflow.environment}
+                        </span>
+                      )}
                     </div>
 
                     <div className="text-xs text-[var(--muted)] mt-1">
@@ -224,7 +252,7 @@ export default function ProjectOverviewPage({
 
                     <button
                       className="workflow-button"
-                      onClick={onCreateWorkflow}
+                      onClick={openCreateModal}
                     >
                       New Workflow
                     </button>
@@ -355,6 +383,58 @@ export default function ProjectOverviewPage({
           </div>
         </div>
       </div>
+
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="panel w-96 p-6 flex flex-col gap-4">
+            <h2 className="text-lg font-bold">New Workflow</h2>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs uppercase text-[var(--muted)] tracking-wide">
+                Name
+              </label>
+              <input
+                type="text"
+                value={createName}
+                onChange={(e) => setCreateName(e.target.value)}
+                placeholder="My Workflow"
+                className="w-full bg-[var(--surface)] border border-[var(--border)] rounded px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs uppercase text-[var(--muted)] tracking-wide">
+                Description
+              </label>
+              <textarea
+                value={createDescription}
+                onChange={(e) => setCreateDescription(e.target.value)}
+                placeholder="Optional description"
+                rows={3}
+                className="w-full bg-[var(--surface)] border border-[var(--border)] rounded px-3 py-2 text-sm outline-none focus:border-[var(--accent)] resize-none"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end mt-2">
+              <button
+                className="workflow-button"
+                onClick={() => setShowCreateModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="workflow-button primary"
+                onClick={handleCreate}
+                disabled={!createName.trim()}
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
