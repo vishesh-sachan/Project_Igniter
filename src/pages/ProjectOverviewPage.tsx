@@ -6,6 +6,7 @@ import {
 import {
   listWorkflows,
   saveWorkflow,
+  deleteWorkflow,
   updateWorkflowMetadata,
 } from "../services/workflowService";
 
@@ -44,6 +45,7 @@ export default function ProjectOverviewPage({
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createName, setCreateName] = useState("");
   const [createDescription, setCreateDescription] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -122,6 +124,16 @@ export default function ProjectOverviewPage({
     await saveWorkflow(projectPath, workflow);
     setShowCreateModal(false);
     onOpenEditor(workflow.id);
+  }
+
+  async function handleDelete() {
+    if (!selectedWorkflow) return;
+    await deleteWorkflow(projectPath, selectedWorkflow.id);
+    setShowDeleteConfirm(false);
+
+    const updated = workflows.filter((w) => w.id !== selectedWorkflow.id);
+    setWorkflows(updated);
+    setSelectedWorkflow(updated.length > 0 ? updated[0] : null);
   }
 
   return (
@@ -375,6 +387,13 @@ export default function ProjectOverviewPage({
                       <button className="workflow-button">
                         Re-analyze
                       </button>
+
+                      <button
+                        className="workflow-button ml-auto"
+                        onClick={() => setShowDeleteConfirm(true)}
+                      >
+                        Delete
+                      </button>
                     </>
                   )}
                 </div>
@@ -383,6 +402,32 @@ export default function ProjectOverviewPage({
           </div>
         </div>
       </div>
+
+      {showDeleteConfirm && selectedWorkflow && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="panel w-96 p-6 flex flex-col gap-4">
+            <h2 className="text-lg font-bold">Delete Workflow</h2>
+            <p className="text-sm text-[var(--muted)]">
+              Are you sure you want to delete <strong>{selectedWorkflow.name}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex gap-2 justify-end mt-2">
+              <button
+                className="workflow-button"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="workflow-button"
+                style={{ borderColor: "var(--danger, #ef4444)", color: "var(--danger, #ef4444)" }}
+                onClick={handleDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
