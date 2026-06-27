@@ -9,6 +9,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             persistence::persistence::read_file,
             persistence::persistence::write_file,
+            persistence::persistence::make_executable,
             persistence::persistence::delete_file,
         ])
         .run(tauri::generate_context!())

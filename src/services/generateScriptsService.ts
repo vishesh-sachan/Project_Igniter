@@ -58,6 +58,9 @@ export async function generateScripts(projectPath: string): Promise<number> {
 
   for (const file of files) {
     await writeFile(file.path, file.content);
+    if (file.path.endsWith(".sh")) {
+      await invoke("make_executable", { path: file.path });
+    }
   }
 
   if (index.schema <= 1) {
