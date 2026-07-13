@@ -1,7 +1,7 @@
 import { Workflow, WorkflowIndex } from "../features/workflow/types/workflow";
 import { convertToBash } from "./bash";
 import { convertToPowerShell } from "./powershell";
-import { generateBashOrchestrator, generatePowerShellOrchestrator, extractProjects } from "./orchestrator";
+import { generateBashOrchestrator, generatePowerShellOrchestrator, generateBashRootWrapper, generatePowerShellRootWrapper, extractProjects } from "./orchestrator";
 
 export interface ConverterFile {
   path: string;
@@ -49,6 +49,16 @@ export function convertAll(
   files.push({
     path: `${orchestratorRoot}/setup.ps1`,
     content: generatePowerShellOrchestrator(projects),
+  });
+
+  const projectRoot = orchestratorRoot.replace(/\/\.project-igniter$/, "");
+  files.push({
+    path: `${projectRoot}/setup.sh`,
+    content: generateBashRootWrapper(),
+  });
+  files.push({
+    path: `${projectRoot}/setup.ps1`,
+    content: generatePowerShellRootWrapper(),
   });
 
   return files;
