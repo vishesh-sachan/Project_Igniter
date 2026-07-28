@@ -68,6 +68,35 @@ Every sub-workflow (branch) is initialized with a single `flow` step of type `co
 
 Workflows are saved as JSON files in `.project-igniter/workflows/<id>.json`. A separate index at `.project-igniter/workflows.json` tracks all workflows.
 
+### Generated Scripts
+
+When scripts are generated (via the "Generate Scripts" button), the converter produces:
+
+```
+<project-root>/
+├── setup.sh                          ← public entry point (committed to repo)
+├── setup.ps1                         ← public entry point (committed to repo)
+└── .project-igniter/
+    ├── setup.sh                      ← orchestrator (flag parsing, drift, routing)
+    ├── setup.ps1                     ← orchestrator
+    ├── workflows.json                ← index (schema, project defs, env refs)
+    ├── workflows/<id>.json           ← individual workflow models
+    └── scripts/<project>/<env>/
+        ├── setup.sh                  ← per-environment execution script
+        └── setup.ps1
+```
+
+No `chmod +x` is needed on any generated file — the chain uses `exec bash` and
+PowerShell's `&` invocation throughout.
+
+**Contributor workflow:**
+```bash
+git clone <repo>
+bash setup.sh              # prompts for inputs, runs setup steps
+# or with a one-time chmod:
+chmod +x setup.sh && ./setup.sh
+```
+
 ## Tech Stack
 
 | Layer | Technology |

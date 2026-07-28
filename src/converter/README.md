@@ -8,7 +8,7 @@ Converts visual workflows into zero-dependency native setup scripts (Bash + Powe
 index.ts                 # Entry: reads index → walks projects/envs → returns files
   ├─ bash.ts             # Recursive tree walker → state-machine Bash dispatch
   ├─ powershell.ts       # Same → PowerShell dispatch
-  ├─ orchestrator.ts     # Generates root setup.sh/setup.ps1 (flag parsing, drift, routing)
+  ├─ orchestrator.ts     # Generates .project-igniter/* setup scripts (flag parsing, drift, routing)
   └─ steps/              # Per-step-type converters (pure functions)
        ├─ information.ts
        ├─ input.ts
@@ -76,14 +76,38 @@ Each `workflows.json` carries a `schema` field. The schema is **auto-incremented
 
 ### Orchestrator
 
-`orchestrator.ts` generates the root `setup.sh`/`setup.ps1` that:
+`orchestrator.ts` generates the `.project-igniter/setup.sh`/`setup.ps1` that:
 
 1. Walks up from `cwd` to find `.project-igniter/`
 2. Maps `cwd` to a project key (via `case` on relative path)
-3. Parses `--env`, `--sync`, `--reset`, `--status`, `--help`
+3. Parses `--env`, `--reset`, `--status`, `--help`
 4. Manages `~/.local/share/project-igniter/<hash>/meta` (SCHEMA, LAST_RUN)
-5. Drift detection: compares SCHEMA from state vs `workflows.json` — if they differ, warns and requires `--sync`
-6. Routes to `.project-igniter/scripts/<project>/<env>/setup.sh`
+5. Drift detection: compares SCHEMA from state vs `workflows.json` — if they differ, prints an info message and auto-updates the stored schema
+6. Routes to `.project-igniter/scripts/<project>/<env>/setup.sh` via `exec bash` (no executable bit required)
+
+### Root Wrapper Scripts
+
+`index.ts` also generates `setup.sh`/`setup.ps1` at the **project root** (parent of `.project-igniter/`)
+that serve as the public entry point for contributors:
+
+```
+<project-root>/setup.sh
+├── delegates to .project-igniter/setup.sh via exec bash "$@" (passes all args)
+└── shows helpful error if setup scripts haven't been generated yet
+
+<project-root>/setup.ps1
+├── delegates to .project-igniter/setup.ps1 via & $SETUP_SCRIPT @args
+└── shows helpful error if setup scripts haven't been generated yet
+```
+
+The entire chain uses `exec bash` (Bash) or `&` (PowerShell) to invoke child scripts,
+so **no `chmod +x` is needed** on any generated file. Contributors can run:
+
+```bash
+bash setup.sh              # any platform with bash
+# or after one-time chmod:
+chmod +x setup.sh && ./setup.sh
+```
 
 ### State Persistence
 
