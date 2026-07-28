@@ -284,13 +284,13 @@ export default function ProjectOverviewPage({
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="workflow-button primary">
+                    {/* <button className="workflow-button primary">
                       Analyze
                       Project
-                    </button>
+                    </button> */}
 
                     <button
-                      className="workflow-button"
+                      className="workflow-button primary"
                       onClick={openCreateModal}
                     >
                       New Workflow
@@ -411,9 +411,9 @@ export default function ProjectOverviewPage({
                         Edit
                       </button>
 
-                      <button className="workflow-button">
+                      {/* <button className="workflow-button">
                         Re-analyze
-                      </button>
+                      </button> */}
 
                       <button
                         className="workflow-button ml-auto"
