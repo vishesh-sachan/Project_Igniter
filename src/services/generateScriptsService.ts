@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Workflow } from "../features/workflow/types/workflow";
+import { resolveOSMerges } from "../features/workflow/utils/workflowUtils";
 import { convertAll, ConverterFile } from "../converter/index";
 
 function projectIgniterPath(projectPath: string): string {
@@ -49,7 +50,7 @@ export async function generateScripts(projectPath: string): Promise<number> {
 
     for (const [envName, entry] of Object.entries(proj.environments)) {
       const wf = await loadWorkflow(projectPath, entry.id);
-      workflows[projKey][envName] = wf;
+      workflows[projKey][envName] = resolveOSMerges(wf);
     }
   }
 

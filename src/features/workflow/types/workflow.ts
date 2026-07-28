@@ -30,6 +30,9 @@ export interface OSBranchStep extends BaseStep {
   macos: Workflow;
   linux: Workflow;
   windows: Workflow;
+  macosMergeFrom?: "linux" | "windows";
+  linuxMergeFrom?: "macos" | "windows";
+  windowsMergeFrom?: "macos" | "linux";
 }
 
 export interface Workflow {

@@ -73,6 +73,70 @@ export function deepCloneWorkflow(workflow: Workflow): Workflow {
   };
 }
 
+export function resolveOSMerges(workflow: Workflow): Workflow {
+  return {
+    ...workflow,
+    steps: workflow.steps.map((step) => {
+      if (step.type !== "osBranch") {
+        if (!hasNestedWorkflows(step)) return step;
+        return resolveOSMergesInStep(step);
+      }
+
+      const osStep = step as OSBranchStep;
+      let macos = osStep.macos;
+      let linux = osStep.linux;
+      let windows = osStep.windows;
+
+      if (osStep.macosMergeFrom === "linux") macos = deepCloneWorkflow(linux);
+      else if (osStep.macosMergeFrom === "windows") macos = deepCloneWorkflow(windows);
+
+      if (osStep.linuxMergeFrom === "macos") linux = deepCloneWorkflow(macos);
+      else if (osStep.linuxMergeFrom === "windows") linux = deepCloneWorkflow(windows);
+
+      if (osStep.windowsMergeFrom === "macos") windows = deepCloneWorkflow(macos);
+      else if (osStep.windowsMergeFrom === "linux") windows = deepCloneWorkflow(linux);
+
+      return {
+        ...osStep,
+        macos: resolveOSMerges(macos),
+        linux: resolveOSMerges(linux),
+        windows: resolveOSMerges(windows),
+      };
+    }),
+  };
+}
+
+function resolveOSMergesInStep(step: Step): Step {
+  switch (step.type) {
+    case "check":
+      return {
+        ...step,
+        onSuccess: resolveOSMerges(step.onSuccess),
+        onFailure: resolveOSMerges(step.onFailure),
+      } as CheckStep;
+    case "condition":
+      return {
+        ...step,
+        onTrue: resolveOSMerges(step.onTrue),
+        onFalse: resolveOSMerges(step.onFalse),
+      } as ConditionStep;
+    case "command":
+      return {
+        ...step,
+        onSuccess: resolveOSMerges(step.onSuccess),
+        onFailure: resolveOSMerges(step.onFailure),
+      } as CommandStep;
+    case "file":
+      return {
+        ...step,
+        onSuccess: resolveOSMerges(step.onSuccess),
+        onFailure: resolveOSMerges(step.onFailure),
+      } as FileStep;
+    default:
+      return step;
+  }
+}
+
 type NestedWorkflowStep =
   | CheckStep
   | ConditionStep
