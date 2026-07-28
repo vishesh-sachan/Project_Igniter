@@ -14,12 +14,12 @@ export function toBash(step: FileStep): string {
   switch (operation.type) {
     case "createOrOverwrite": {
       const content = interpolateVars(operation.content);
-      return `cat > "${filePath}" << 'EOF'\n${content}\nEOF`;
+      return `cat > "${filePath}" << EOF\n${content}\nEOF`;
     }
 
     case "append": {
       const content = interpolateVars(operation.content);
-      return `cat >> "${filePath}" << 'EOF'\n${content}\nEOF`;
+      return `cat >> "${filePath}" << EOF\n${content}\nEOF`;
     }
 
     case "replaceText": {

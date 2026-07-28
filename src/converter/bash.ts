@@ -1,4 +1,5 @@
 import { Workflow, Step } from "../features/workflow/types/workflow";
+import { sanitizeVarName } from "./utils";
 import { toBash as infoStep } from "./steps/information";
 import { toBash as inputStep } from "./steps/input";
 import { toBash as checkStep } from "./steps/check";
@@ -118,9 +119,12 @@ function generateBranchingStep(
       const cmdBody = commandStep(step);
       const onSuccId = getFirstStepId(step.onSuccess);
       const onFailId = getFirstStepId(step.onFailure);
+      const captureVar = "captureExitCodeTo" in step ? (step as any).captureExitCodeTo : null;
+      const exitCodeVar = captureVar ? sanitizeVarName(captureVar) : null;
+      const exitCheck = exitCodeVar ? `[ "\${${exitCodeVar}}" -eq 0 ]` : `[ $? -eq 0 ]`;
       const body = [
         cmdBody,
-        `if [ $? -eq 0 ]; then`,
+        `if ${exitCheck}; then`,
         `  NEXT="${onSuccId || nextId || ""}"`,
         "else",
         `  NEXT="${onFailId || nextId || ""}"`,
@@ -169,10 +173,37 @@ function generateBranchingStep(
 function buildDispatch(entries: Entry[]): string {
   return entries
     .map((entry) => {
-      const body = entry.body.replace(/\n/g, "\n      ");
-      return `    ${entry.id})\n      ${body}\n      ;;`;
+      const indentedBody = indentBody(entry.body);
+      return `    ${entry.id})\n${indentedBody}\n      ;;`;
     })
     .join("\n");
+}
+
+const HEREDOC_RE = /<<\s*(-?)\s*(['"]?)(\w+)\2/;
+
+function indentBody(body: string): string {
+  const lines = body.split("\n");
+  const result: string[] = [];
+  let inHeredoc = false;
+  let heredocWord = "";
+
+  for (const line of lines) {
+    if (!inHeredoc) {
+      const match = line.match(HEREDOC_RE);
+      if (match) {
+        heredocWord = match[3];
+        inHeredoc = true;
+      }
+      result.push(`      ${line}`);
+    } else if (line.trim() === heredocWord) {
+      inHeredoc = false;
+      result.push(line);
+    } else {
+      result.push(`      ${line}`);
+    }
+  }
+
+  return result.join("\n");
 }
 
 export function convertToBash(workflow: Workflow): string {
