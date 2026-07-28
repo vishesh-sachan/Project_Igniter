@@ -9,6 +9,70 @@ import {
   WorkflowPath,
 } from "../types/workflow";
 
+export function deepCloneStep(step: Step): Step {
+  const newId = crypto.randomUUID();
+
+  function cloneWorkflow(wf: Workflow): Workflow {
+    return {
+      ...wf,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      steps: wf.steps.map((s) => deepCloneStep(s)),
+    };
+  }
+
+  const base = { ...step, id: newId, name: step.name + " (copy)" };
+
+  switch (step.type) {
+    case "check":
+      return {
+        ...base,
+        onSuccess: cloneWorkflow(step.onSuccess),
+        onFailure: cloneWorkflow(step.onFailure),
+      } as CheckStep;
+    case "condition":
+      return {
+        ...base,
+        onTrue: cloneWorkflow(step.onTrue),
+        onFalse: cloneWorkflow(step.onFalse),
+      } as ConditionStep;
+    case "command":
+      return {
+        ...base,
+        onSuccess: cloneWorkflow(step.onSuccess),
+        onFailure: cloneWorkflow(step.onFailure),
+      } as CommandStep;
+    case "file":
+      return {
+        ...base,
+        onSuccess: cloneWorkflow(step.onSuccess),
+        onFailure: cloneWorkflow(step.onFailure),
+      } as FileStep;
+    case "osBranch":
+      return {
+        ...base,
+        macos: cloneWorkflow(step.macos),
+        linux: cloneWorkflow(step.linux),
+        windows: cloneWorkflow(step.windows),
+      } as OSBranchStep;
+    default:
+      return base as Step;
+  }
+}
+
+export function deepCloneWorkflow(workflow: Workflow): Workflow {
+  return {
+    ...workflow,
+    id: crypto.randomUUID(),
+    name: workflow.name + " (copy)",
+    environment: undefined,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    steps: workflow.steps.map((s) => deepCloneStep(s)),
+  };
+}
+
 type NestedWorkflowStep =
   | CheckStep
   | ConditionStep

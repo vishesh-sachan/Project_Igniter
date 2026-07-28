@@ -6,6 +6,7 @@ import {
 import {
   listWorkflows,
   saveWorkflow,
+  loadWorkflow,
   deleteWorkflow,
   updateWorkflowMetadata,
 } from "../services/workflowService";
@@ -14,6 +15,7 @@ import { generateScripts } from "../services/generateScriptsService";
 
 import { WorkflowSummary } from "../features/workflow/types/workflow";
 import { createWorkflow } from "../features/workflow/factory/workflowFactory";
+import { deepCloneWorkflow } from "../features/workflow/utils/workflowUtils";
 
 type Props = {
   projectPath: string;
@@ -138,6 +140,14 @@ export default function ProjectOverviewPage({
     const updated = workflows.filter((w) => w.id !== selectedWorkflow.id);
     setWorkflows(updated);
     setSelectedWorkflow(updated.length > 0 ? updated[0] : null);
+  }
+
+  async function handleDuplicate() {
+    if (!selectedWorkflow) return;
+    const workflow = await loadWorkflow(projectPath, selectedWorkflow.id);
+    const copy = deepCloneWorkflow(workflow);
+    await saveWorkflow(projectPath, copy);
+    setWorkflows(await listWorkflows(projectPath));
   }
 
   async function handleGenerate() {
@@ -409,6 +419,13 @@ export default function ProjectOverviewPage({
                         onClick={startEditing}
                       >
                         Edit
+                      </button>
+
+                      <button
+                        className="workflow-button"
+                        onClick={handleDuplicate}
+                      >
+                        Duplicate
                       </button>
 
                       {/* <button className="workflow-button">
