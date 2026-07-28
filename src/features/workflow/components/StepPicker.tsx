@@ -12,7 +12,6 @@ const STEP_TYPES: Step["type"][] = [
   "command",
   "choice",
   "file",
-  "flow",
   "osBranch",
 ];
 
