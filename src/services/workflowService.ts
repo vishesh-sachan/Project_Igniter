@@ -80,6 +80,25 @@ function removeFromIndex(index: WorkflowIndex, workflowId: string): void {
   }
 }
 
+async function releaseEnvironment(
+  projectPath: string,
+  index: WorkflowIndex,
+  envName: string,
+  exceptWorkflowId: string
+): Promise<void> {
+  const project = index.projects[index.defaultProject] || index.projects.root;
+  const existing = project.environments[envName];
+  if (!existing || existing.id === exceptWorkflowId) return;
+
+  const other = await loadWorkflow(projectPath, existing.id);
+  other.environment = undefined;
+  other.updatedAt = new Date().toISOString();
+  await writeFile(workflowPath(projectPath, existing.id), JSON.stringify(other, null, 2));
+
+  delete project.environments[envName];
+  index.standalone.push(workflowToSummary(other));
+}
+
 export async function saveWorkflow(projectPath: string, workflow: Workflow): Promise<void> {
   try {
     const index = await loadWorkflowIndex(projectPath);
@@ -88,6 +107,7 @@ export async function saveWorkflow(projectPath: string, workflow: Workflow): Pro
     removeFromIndex(index, workflow.id);
 
     if (workflow.environment) {
+      await releaseEnvironment(projectPath, index, workflow.environment, workflow.id);
       const project = index.projects[index.defaultProject] || index.projects.root;
       project.environments[workflow.environment] = summary;
     } else {

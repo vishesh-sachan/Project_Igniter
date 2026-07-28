@@ -142,10 +142,11 @@ export default function ProjectOverviewPage({
     setSelectedWorkflow(updated.length > 0 ? updated[0] : null);
   }
 
-  async function handleDuplicate() {
-    if (!selectedWorkflow) return;
-    const workflow = await loadWorkflow(projectPath, selectedWorkflow.id);
-    const copy = deepCloneWorkflow(workflow);
+  async function handleDuplicate(workflow?: WorkflowSummary) {
+    const target = workflow ?? selectedWorkflow;
+    if (!target) return;
+    const full = await loadWorkflow(projectPath, target.id);
+    const copy = deepCloneWorkflow(full);
     await saveWorkflow(projectPath, copy);
     setWorkflows(await listWorkflows(projectPath));
   }
@@ -234,7 +235,7 @@ export default function ProjectOverviewPage({
 
               {workflows.map(
                 (workflow) => (
-                  <button
+                  <div
                     key={
                       workflow.id
                     }
@@ -243,35 +244,48 @@ export default function ProjectOverviewPage({
                         workflow
                       )
                     }
-                    className={`text-left p-3 rounded border transition-all ${selectedWorkflow?.id ===
+                    className={`flex items-center gap-2 p-3 rounded border transition-all cursor-pointer ${selectedWorkflow?.id ===
                       workflow.id
                       ? "border-white"
                       : "border-[var(--border)]"
                       }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <div className="font-medium">
-                        {
-                          workflow.name
-                        }
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium truncate">
+                          {
+                            workflow.name
+                          }
+                        </div>
+
+                        {workflow.environment && (
+                          <span className="text-xs uppercase tracking-wide text-[var(--accent)] border border-[var(--accent)] rounded px-1.5 py-0.5 leading-none shrink-0">
+                            {workflow.environment}
+                          </span>
+                        )}
                       </div>
 
-                      {workflow.environment && (
-                        <span className="text-xs uppercase tracking-wide text-[var(--accent)] border border-[var(--accent)] rounded px-1.5 py-0.5 leading-none">
-                          {workflow.environment}
-                        </span>
-                      )}
+                      <div className="text-xs text-[var(--muted)] mt-1">
+                        Updated{" "}
+                        {
+                          formatDate(
+                            workflow.updatedAt
+                          )
+                        }
+                      </div>
                     </div>
 
-                    <div className="text-xs text-[var(--muted)] mt-1">
-                      Updated{" "}
-                      {
-                        formatDate(
-                          workflow.updatedAt
-                        )
-                      }
-                    </div>
-                  </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDuplicate(workflow); }}
+                      className="text-[var(--muted)] hover:text-[var(--text)] transition-colors p-1 shrink-0"
+                      title="Duplicate workflow"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    </button>
+                  </div>
                 )
               )}
             </div>
@@ -419,13 +433,6 @@ export default function ProjectOverviewPage({
                         onClick={startEditing}
                       >
                         Edit
-                      </button>
-
-                      <button
-                        className="workflow-button"
-                        onClick={handleDuplicate}
-                      >
-                        Duplicate
                       </button>
 
                       {/* <button className="workflow-button">
