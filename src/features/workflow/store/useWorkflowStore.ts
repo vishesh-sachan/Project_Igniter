@@ -6,6 +6,7 @@ import {
   deleteStepRecursive,
   addStepToWorkflow,
   moveStepInWorkflow,
+  duplicateStepInWorkflow,
   touchWorkflow,
 } from "../utils/workflowUtils";
 
@@ -30,6 +31,7 @@ interface WorkflowStore {
   moveStep: (path: WorkflowPath, fromIndex: number, toIndex: number) => void;
   updateStep: (step: Step) => void;
   deleteStep: (stepId: string) => void;
+  duplicateStep: (stepId: string) => void;
   updateWorkflowMeta: (meta: { name?: string; environment?: string }) => void;
   markClean: () => void;
 }
@@ -76,6 +78,13 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => ({
           ? null
           : selectedStepId,
     });
+  },
+
+  duplicateStep: (stepId) => {
+    set((state) => ({
+      workflow: touchWorkflow(duplicateStepInWorkflow(state.workflow, stepId)),
+      dirty: true,
+    }));
   },
 
   updateWorkflowMeta: (meta) => {

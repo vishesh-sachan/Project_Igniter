@@ -25,6 +25,7 @@ export default function WorkflowNode({
   const [osTab, setOsTab] = useState<"macos" | "linux" | "windows">("macos");
   const selectedStepId = useWorkflowStore((s) => s.selectedStepId);
   const selectStep = useWorkflowStore((s) => s.selectStep);
+  const duplicateStep = useWorkflowStore((s) => s.duplicateStep);
 
   const selected = selectedStepId === step.id;
 
@@ -129,6 +130,17 @@ export default function WorkflowNode({
           <div className="font-medium">
             {step.name}
           </div>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); duplicateStep(step.id); }}
+            className="ml-auto text-[var(--muted)] hover:text-[var(--text)] transition-colors px-1"
+            title="Duplicate step"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          </button>
         </div>
 
         <div className="text-xs text-[var(--muted)]">

@@ -420,3 +420,78 @@ export function touchWorkflow(workflow: Workflow): Workflow {
     updatedAt: new Date().toISOString(),
   };
 }
+
+export function duplicateStepInWorkflow(
+  workflow: Workflow,
+  stepId: string
+): Workflow {
+  const result = duplicateStepInBranch(workflow, stepId);
+  return result.found ? result.workflow : workflow;
+}
+
+function duplicateStepInBranch(
+  workflow: Workflow,
+  stepId: string
+): { workflow: Workflow; found: boolean } {
+  const index = workflow.steps.findIndex(
+    (s) => s.id === stepId
+  );
+
+  if (index !== -1) {
+    const clone = deepCloneStep(workflow.steps[index]);
+    const steps = [...workflow.steps];
+    steps.splice(index + 1, 0, clone);
+    return { workflow: { ...workflow, steps }, found: true };
+  }
+
+  let updatedSteps = [...workflow.steps];
+  let found = false;
+
+  updatedSteps = updatedSteps.map((step) => {
+    if (found) return step;
+
+    switch (step.type) {
+      case "check": {
+        const r1 = duplicateStepInBranch(step.onSuccess, stepId);
+        if (r1.found) { found = true; return { ...step, onSuccess: r1.workflow }; }
+        const r2 = duplicateStepInBranch(step.onFailure, stepId);
+        if (r2.found) { found = true; return { ...step, onFailure: r2.workflow }; }
+        return step;
+      }
+      case "condition": {
+        const r1 = duplicateStepInBranch(step.onTrue, stepId);
+        if (r1.found) { found = true; return { ...step, onTrue: r1.workflow }; }
+        const r2 = duplicateStepInBranch(step.onFalse, stepId);
+        if (r2.found) { found = true; return { ...step, onFalse: r2.workflow }; }
+        return step;
+      }
+      case "command": {
+        const r1 = duplicateStepInBranch(step.onSuccess, stepId);
+        if (r1.found) { found = true; return { ...step, onSuccess: r1.workflow }; }
+        const r2 = duplicateStepInBranch(step.onFailure, stepId);
+        if (r2.found) { found = true; return { ...step, onFailure: r2.workflow }; }
+        return step;
+      }
+      case "file": {
+        const r1 = duplicateStepInBranch(step.onSuccess, stepId);
+        if (r1.found) { found = true; return { ...step, onSuccess: r1.workflow }; }
+        const r2 = duplicateStepInBranch(step.onFailure, stepId);
+        if (r2.found) { found = true; return { ...step, onFailure: r2.workflow }; }
+        return step;
+      }
+      case "osBranch": {
+        const r1 = duplicateStepInBranch(step.macos, stepId);
+        if (r1.found) { found = true; return { ...step, macos: r1.workflow }; }
+        const r2 = duplicateStepInBranch(step.linux, stepId);
+        if (r2.found) { found = true; return { ...step, linux: r2.workflow }; }
+        const r3 = duplicateStepInBranch(step.windows, stepId);
+        if (r3.found) { found = true; return { ...step, windows: r3.workflow }; }
+        return step;
+      }
+      default:
+        return step;
+    }
+  });
+
+  return { workflow: { ...workflow, steps: updatedSteps }, found };
+}
