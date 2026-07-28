@@ -60,9 +60,9 @@ export default function TopBar({
           </select>
         </div>
 
-        <button className="workflow-button">
+        {/* <button className="workflow-button">
           Validate
-        </button>
+        </button> */}
 
         <button
           className={`workflow-button${dirty ? " primary" : ""}`}
