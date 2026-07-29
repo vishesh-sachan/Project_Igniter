@@ -201,6 +201,7 @@ export interface ProjectIndex {
   path: string;
   defaultEnv: string;
   environments: Record<string, EnvEntry>;
+  standalone: WorkflowSummary[];
 }
 
 export interface WorkflowIndex {

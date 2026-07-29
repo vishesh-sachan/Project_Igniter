@@ -15,6 +15,7 @@ type AppState =
     page: "workflowBuilder";
     projectPath: string;
     workflowId?: string;
+    projectKey?: string;
   };
 
 function App() {
@@ -52,7 +53,8 @@ function App() {
             })
           }
           onOpenEditor={(
-            workflowId
+            workflowId,
+            projectKey
           ) =>
             setState({
               page:
@@ -60,6 +62,7 @@ function App() {
               projectPath:
                 state.projectPath,
               workflowId,
+              projectKey,
             })
           }
         />
@@ -73,6 +76,9 @@ function App() {
           }
           workflowId={
             state.workflowId
+          }
+          projectKey={
+            state.projectKey
           }
           onBack={() =>
             setState({

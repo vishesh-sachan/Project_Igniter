@@ -27,6 +27,7 @@ function createDefaultIndex(): WorkflowIndex {
         path: ".",
         defaultEnv: "dev",
         environments: {},
+        standalone: [],
       },
     },
   };
@@ -72,8 +73,11 @@ function removeFromIndex(index: WorkflowIndex, workflowId: string): void {
   index.standalone = index.standalone.filter((s) => s.id !== workflowId);
 
   for (const project of Object.values(index.projects)) {
-    for (const [envName, entry] of Object.entries(project.environments)) {
-      if (entry.id === workflowId) {
+    if (project.standalone) {
+      project.standalone = project.standalone.filter((s) => s.id !== workflowId);
+    }
+    for (const envName of Object.keys(project.environments)) {
+      if (project.environments[envName].id === workflowId) {
         delete project.environments[envName];
       }
     }
@@ -84,9 +88,11 @@ async function releaseEnvironment(
   projectPath: string,
   index: WorkflowIndex,
   envName: string,
-  exceptWorkflowId: string
+  exceptWorkflowId: string,
+  projectKey: string,
 ): Promise<void> {
-  const project = index.projects[index.defaultProject] || index.projects.root;
+  const project = index.projects[projectKey];
+  if (!project) return;
   const existing = project.environments[envName];
   if (!existing || existing.id === exceptWorkflowId) return;
 
@@ -96,10 +102,10 @@ async function releaseEnvironment(
   await writeFile(workflowPath(projectPath, existing.id), JSON.stringify(other, null, 2));
 
   delete project.environments[envName];
-  index.standalone.push(workflowToSummary(other));
+  project.standalone.push(workflowToSummary(other));
 }
 
-export async function saveWorkflow(projectPath: string, workflow: Workflow): Promise<void> {
+export async function saveWorkflow(projectPath: string, workflow: Workflow, projectKey?: string): Promise<void> {
   try {
     const index = await loadWorkflowIndex(projectPath);
     const summary = workflowToSummary(workflow);
@@ -107,11 +113,17 @@ export async function saveWorkflow(projectPath: string, workflow: Workflow): Pro
     removeFromIndex(index, workflow.id);
 
     if (workflow.environment) {
-      await releaseEnvironment(projectPath, index, workflow.environment, workflow.id);
-      const project = index.projects[index.defaultProject] || index.projects.root;
-      project.environments[workflow.environment] = summary;
+      const key = projectKey ?? index.defaultProject;
+      await releaseEnvironment(projectPath, index, workflow.environment, workflow.id, key);
+      const project = index.projects[key];
+      if (project) project.environments[workflow.environment] = summary;
     } else {
-      index.standalone.push(summary);
+      if (projectKey && projectKey !== "root") {
+        const project = index.projects[projectKey];
+        if (project) project.standalone.push(summary);
+      } else {
+        index.standalone.push(summary);
+      }
     }
 
     await saveWorkflowIndex(projectPath, index);
@@ -130,16 +142,26 @@ export async function loadWorkflow(projectPath: string, workflowId: string): Pro
   }
 }
 
-export async function listWorkflows(projectPath: string): Promise<WorkflowSummary[]> {
+export async function listWorkflows(projectPath: string, projectKey?: string): Promise<WorkflowSummary[]> {
   const index = await loadWorkflowIndex(projectPath);
-  const summaries: WorkflowSummary[] = [...index.standalone];
 
-  for (const project of Object.values(index.projects)) {
+  if (projectKey && projectKey !== "root") {
+    const project = index.projects[projectKey];
+    if (!project) return [];
+    const summaries: WorkflowSummary[] = [...(project.standalone ?? [])];
     for (const [envName, entry] of Object.entries(project.environments)) {
       summaries.push({ ...entry, environment: envName });
     }
+    return summaries;
   }
 
+  const root = index.projects.root;
+  const summaries: WorkflowSummary[] = [...index.standalone];
+  if (root) {
+    for (const [envName, entry] of Object.entries(root.environments)) {
+      summaries.push({ ...entry, environment: envName });
+    }
+  }
   return summaries;
 }
 
@@ -163,6 +185,7 @@ export async function updateWorkflowMetadata(
   projectPath: string,
   workflowId: string,
   updates: { name?: string; description?: string },
+  projectKey?: string,
 ): Promise<void> {
   try {
     const workflow = await loadWorkflow(projectPath, workflowId);
@@ -178,14 +201,48 @@ export async function updateWorkflowMetadata(
     removeFromIndex(index, workflowId);
 
     if (workflow.environment) {
-      const project = index.projects[index.defaultProject] || index.projects.root;
-      project.environments[workflow.environment] = summary;
+      const key = projectKey ?? index.defaultProject;
+      await releaseEnvironment(projectPath, index, workflow.environment, workflow.id, key);
+      const project = index.projects[key];
+      if (project) project.environments[workflow.environment] = summary;
     } else {
-      index.standalone.push(summary);
+      if (projectKey && projectKey !== "root") {
+        const project = index.projects[projectKey];
+        if (project) project.standalone.push(summary);
+      } else {
+        index.standalone.push(summary);
+      }
     }
 
     await saveWorkflowIndex(projectPath, index);
   } catch (error) {
     throw new Error(`Failed to update workflow metadata: ${error}`);
   }
+}
+
+export async function addProjectEntry(
+  projectPath: string,
+  projectKey: string,
+  relativePath: string,
+): Promise<void> {
+  const index = await loadWorkflowIndex(projectPath);
+
+  if (index.projects[projectKey]) {
+    throw new Error(`Project "${projectKey}" already exists`);
+  }
+
+  index.projects[projectKey] = {
+    path: relativePath,
+    defaultEnv: "dev",
+    environments: {},
+    standalone: [],
+  };
+
+  await saveWorkflowIndex(projectPath, index);
+}
+
+export async function loadWorkflowIndexRaw(
+  projectPath: string,
+): Promise<import("../features/workflow/types/workflow").WorkflowIndex> {
+  return loadWorkflowIndex(projectPath);
 }

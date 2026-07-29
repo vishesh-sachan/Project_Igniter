@@ -3,17 +3,24 @@ import {
   useState,
 } from "react";
 
+import { open } from "@tauri-apps/plugin-dialog";
+
 import {
   listWorkflows,
   saveWorkflow,
   loadWorkflow,
   deleteWorkflow,
   updateWorkflowMetadata,
+  addProjectEntry,
+  loadWorkflowIndexRaw,
 } from "../services/workflowService";
 
 import { generateScripts } from "../services/generateScriptsService";
 
-import { WorkflowSummary } from "../features/workflow/types/workflow";
+import {
+  WorkflowSummary,
+  WorkflowIndex,
+} from "../features/workflow/types/workflow";
 import { createWorkflow } from "../features/workflow/factory/workflowFactory";
 import { deepCloneWorkflow } from "../features/workflow/utils/workflowUtils";
 
@@ -23,7 +30,8 @@ type Props = {
   onBack: () => void;
 
   onOpenEditor: (
-    workflowId: string
+    workflowId: string,
+    projectKey?: string
   ) => void;
 };
 
@@ -52,16 +60,23 @@ export default function ProjectOverviewPage({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [projectIndex, setProjectIndex] = useState<WorkflowIndex | null>(null);
+  const [activeProject, setActiveProject] = useState("root");
+  const [showAddProject, setShowAddProject] = useState(false);
+  const [addProjectPath, setAddProjectPath] = useState("");
+  const [addProjectName, setAddProjectName] = useState("");
 
   useEffect(() => {
     async function load() {
       try {
-        const result =
-          await listWorkflows(
-            projectPath
-          );
+        const [result, index] =
+          await Promise.all([
+            listWorkflows(projectPath, activeProject),
+            loadWorkflowIndexRaw(projectPath),
+          ]);
 
         setWorkflows(result);
+        setProjectIndex(index);
 
         if (
           result.length > 0
@@ -76,7 +91,7 @@ export default function ProjectOverviewPage({
     }
 
     load();
-  }, [projectPath]);
+  }, [projectPath, activeProject]);
 
   function startEditing() {
     if (!selectedWorkflow) return;
@@ -127,9 +142,10 @@ export default function ProjectOverviewPage({
     workflow.name = createName.trim();
     workflow.description = createDescription.trim() || undefined;
 
-    await saveWorkflow(projectPath, workflow);
+    await saveWorkflow(projectPath, workflow, activeProject);
     setShowCreateModal(false);
-    onOpenEditor(workflow.id);
+    setWorkflows(await listWorkflows(projectPath, activeProject));
+    onOpenEditor(workflow.id, activeProject);
   }
 
   async function handleDelete() {
@@ -137,9 +153,9 @@ export default function ProjectOverviewPage({
     await deleteWorkflow(projectPath, selectedWorkflow.id);
     setShowDeleteConfirm(false);
 
-    const updated = workflows.filter((w) => w.id !== selectedWorkflow.id);
-    setWorkflows(updated);
-    setSelectedWorkflow(updated.length > 0 ? updated[0] : null);
+    const result = await listWorkflows(projectPath, activeProject);
+    setWorkflows(result);
+    setSelectedWorkflow(result.length > 0 ? result[0] : null);
   }
 
   async function handleDuplicate(workflow?: WorkflowSummary) {
@@ -147,8 +163,46 @@ export default function ProjectOverviewPage({
     if (!target) return;
     const full = await loadWorkflow(projectPath, target.id);
     const copy = deepCloneWorkflow(full);
-    await saveWorkflow(projectPath, copy);
-    setWorkflows(await listWorkflows(projectPath));
+    await saveWorkflow(projectPath, copy, activeProject);
+    setWorkflows(await listWorkflows(projectPath, activeProject));
+  }
+
+  async function handleAddProject() {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+    });
+    if (typeof selected !== "string") return;
+    if (!selected.startsWith(projectPath)) {
+      setToast("Selected directory is not inside the project root");
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+    const relative = selected.slice(projectPath.length).replace(/^\//, "");
+    if (!relative) {
+      setToast("Select a subdirectory, not the root");
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+    const autoName = relative.replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase() || "project";
+    setAddProjectPath(relative);
+    setAddProjectName(autoName);
+    setShowAddProject(true);
+  }
+
+  async function handleConfirmAddProject() {
+    if (!addProjectName.trim() || !addProjectPath) return;
+    try {
+      await addProjectEntry(projectPath, addProjectName.trim(), addProjectPath);
+      const index = await loadWorkflowIndexRaw(projectPath);
+      setProjectIndex(index);
+      setActiveProject(addProjectName.trim());
+      setToast(`Added project "${addProjectName.trim()}"`);
+    } catch (e) {
+      setToast(`Failed: ${e}`);
+    }
+    setShowAddProject(false);
+    setTimeout(() => setToast(null), 4000);
   }
 
   async function handleGenerate() {
@@ -204,7 +258,36 @@ export default function ProjectOverviewPage({
       <div className="flex-1 p-6">
         <div className="grid grid-cols-[320px_1fr] gap-6 h-full">
           {/* Left */}
-          <div className="panel overflow-hidden">
+          <div className="panel overflow-hidden flex flex-col">
+            <div className="border-b border-[var(--border)] px-4 py-3 flex items-center justify-between">
+              <div className="text-sm uppercase tracking-wide text-[var(--muted)]">
+                Projects
+              </div>
+
+              <button
+                className="workflow-button text-xs px-2 py-1"
+                onClick={handleAddProject}
+              >
+                + Add
+              </button>
+            </div>
+
+            <div className="p-3 flex flex-wrap gap-2 border-b border-[var(--border)]">
+              {projectIndex && Object.keys(projectIndex.projects).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveProject(key)}
+                  className={`text-xs px-2.5 py-1 rounded border transition-all ${
+                    activeProject === key
+                      ? "border-[var(--accent)] text-[var(--accent)]"
+                      : "border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]"
+                  }`}
+                >
+                  {key}
+                </button>
+              ))}
+            </div>
+
             <div className="border-b border-[var(--border)] px-4 py-3 flex items-center justify-between">
               <div className="text-sm uppercase tracking-wide text-[var(--muted)]">
                 Workflows
@@ -218,7 +301,7 @@ export default function ProjectOverviewPage({
               </button>
             </div>
 
-            <div className="p-3 flex flex-col gap-2">
+            <div className="flex-1 p-3 flex flex-col gap-2 overflow-y-auto">
               {loading && (
                 <div className="text-sm text-[var(--muted)]">
                   Loading...
@@ -422,7 +505,7 @@ export default function ProjectOverviewPage({
                       <button
                         className="workflow-button primary"
                         onClick={() =>
-                          onOpenEditor(selectedWorkflow.id)
+                          onOpenEditor(selectedWorkflow.id, activeProject)
                         }
                       >
                         Open Editor
@@ -532,6 +615,57 @@ export default function ProjectOverviewPage({
                 disabled={!createName.trim()}
               >
                 Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddProject && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="panel w-96 p-6 flex flex-col gap-4">
+            <h2 className="text-lg font-bold">Add Project</h2>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs uppercase text-[var(--muted)] tracking-wide">
+                Relative Path
+              </label>
+              <div className="w-full bg-[var(--background)] border border-[var(--border)] rounded px-3 py-2 text-sm text-[var(--muted)]">
+                {addProjectPath}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs uppercase text-[var(--muted)] tracking-wide">
+                Project Name
+              </label>
+              <input
+                type="text"
+                value={addProjectName}
+                onChange={(e) => setAddProjectName(e.target.value)}
+                placeholder="my-project"
+                className="w-full bg-[var(--surface)] border border-[var(--border)] rounded px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+                autoFocus
+              />
+              <p className="text-xs text-[var(--muted)]">
+                Used with <code className="text-[var(--text)]">--proj</code> flag when running setup scripts
+              </p>
+            </div>
+
+            <div className="flex gap-2 justify-end mt-2">
+              <button
+                className="workflow-button"
+                onClick={() => setShowAddProject(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="workflow-button primary"
+                onClick={handleConfirmAddProject}
+                disabled={!addProjectName.trim()}
+              >
+                Add
               </button>
             </div>
           </div>

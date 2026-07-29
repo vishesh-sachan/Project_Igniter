@@ -25,7 +25,7 @@ async function loadWorkflowIndex(projectPath: string): Promise<import("../featur
       defaultProject: "root",
       standalone: [],
       projects: {
-        root: { path: ".", defaultEnv: "dev", environments: {} },
+        root: { path: ".", defaultEnv: "dev", environments: {}, standalone: [] },
       },
     };
   }

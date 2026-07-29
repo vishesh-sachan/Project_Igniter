@@ -12,12 +12,14 @@ import { loadWorkflow, saveWorkflow } from "../services/workflowService";
 type Props = {
     projectPath: string;
     workflowId?: string;
+    projectKey?: string;
     onBack: () => void;
 };
 
 export default function WorkflowBuilder({
     projectPath,
     workflowId,
+    projectKey,
     onBack,
 }: Props) {
     const workflow = useWorkflowStore((s) => s.workflow);
@@ -37,7 +39,7 @@ export default function WorkflowBuilder({
     async function handleSave() {
         setSaving(true);
         try {
-            await saveWorkflow(projectPath, workflow);
+            await saveWorkflow(projectPath, workflow, projectKey);
             markClean();
         } catch (error) {
             console.error("Failed to save workflow", error);
