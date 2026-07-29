@@ -1,4 +1,5 @@
 import { InputStep } from "../../workflow/types/workflow";
+import { sanitizeVarName } from "../../../converter/utils";
 
 type Props = {
     step: InputStep;
@@ -39,7 +40,7 @@ export default function InputProperties({
                         updateStep({
                             ...step,
                             variableName:
-                                e.target.value,
+                                sanitizeVarName(e.target.value),
                         })
                     }
                 />

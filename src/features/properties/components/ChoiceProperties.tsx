@@ -1,4 +1,5 @@
 import { ChoiceStep } from "../../workflow/types/workflow";
+import { sanitizeVarName } from "../../../converter/utils";
 
 type Props = {
   step: ChoiceStep;
@@ -67,7 +68,7 @@ export default function ChoiceProperties({
             updateStep({
               ...step,
               variableName:
-                e.target.value,
+                sanitizeVarName(e.target.value),
             })
           }
         />

@@ -6,6 +6,7 @@ import {
     DirectoryExistsCheck,
     EnvironmentVariableCheck,
 } from "../../workflow/types/workflow";
+import { sanitizeVarName } from "../../../converter/utils";
 
 type Props = {
     step: CheckStep;
@@ -230,7 +231,7 @@ export default function CheckProperties({
                                     type:
                                         "environmentVariable",
                                     variableName:
-                                        e.target.value,
+                                        sanitizeVarName(e.target.value),
                                 })
                             }
                         />
