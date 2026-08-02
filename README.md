@@ -1,12 +1,8 @@
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<p align="center">
+  <img src="assets/logo.svg" alt="PROJECT_IGNITER" width="480">
+</p>
 
-<div style="font-family: 'JetBrains Mono', monospace; color: #f8f9fa; background: #0a0a0a; padding: 24px; border-radius: 12px; line-height: 1.7;">
-
-# PROJECT<span style="color:#7cff6b">_</span>IGNITER
-
-*Analyze your project · compose visual workflows · forge zero-dependency setup scripts*
+<p align="center"><em>Analyze your project · compose visual workflows · forge zero-dependency setup scripts</em></p>
 
 <!--
 ![Screenshot](assets/screenshot.png)
@@ -24,7 +20,7 @@ Project Igniter lets maintainers model that setup as a **visual workflow** and g
 |---|---|
 | **Workflow Composer** | Visual tree editor — 9 step types, drag-to-reorder, recursive branching, 3-panel layout with context variables and property inspector |
 | **Script Forge** | Converts workflows into zero-dependency Bash and PowerShell scripts. No Node.js, no Tauri, no runtime — just native shell |
-| **Project Analyzer** | *(coming soon)* Scans your project and suggests a starter workflow from detected patterns |
+| **Project Analyzer** | *(coming next)* Scans your project and suggests a starter workflow from detected patterns |
 | **One-Command Setup** | `bash setup.sh` — nothing else required |
 | **Cross-Platform** | Generates both `setup.sh` (Bash) and `setup.ps1` (PowerShell) for every environment |
 | **Variables & Context** | Prompt for input once, reference it across all steps via `{{variable}}` interpolation |
@@ -44,17 +40,24 @@ The script detects your platform, prompts for any required inputs, and runs the 
 
 ## Installation
 
-> Early development — preview builds coming soon. [Star the repo](https://github.com/vishesh-sachan/Project_Igniter) to stay updated.
+> Early development — preview builds coming soon. [Star the repository](https://github.com/vishesh-sachan/Project_Igniter) to stay updated.
+
+**For maintainers** — Project Igniter bootstraps its own setup. Clone the repo and run its generated installer:
+
+```bash
+git clone https://github.com/vishesh-sachan/Project_Igniter
+bash setup.sh
+```
+
+This runs the setup workflow for Project Igniter itself, launching the desktop app so you can model workflows and generate scripts for your project.
 
 ## Roadmap
 
-See the full roadmap on the landing page: [project-igniter.nytkode.com/#roadmap](https://project-igniter.nytkode.com/#roadmap)
+See the full [roadmap on the landing page](https://project-igniter.nytkode.com/#roadmap)
 
-High-level phases:
-
-1. **Workflow Composer** *(completed)* — visual tree editor for modeling setup with 9 step types, drag-to-reorder, and recursive branching
-2. **Script Forge Optimisation** *(in progress)* — cleaner generated scripts, better error handling, faster generation
-3. **Project Analyzer** *(coming next)* — scan a directory and auto-produce a starter workflow from package managers, config files, and build scripts
+- **Workflow Composer** *(completed)* — visual tree editor for modeling setup with 9 step types, drag-to-reorder, and recursive branching
+- **Script Forge Optimisation** *(in progress)* — cleaner generated scripts, better error handling, faster generation
+- **Project Analyzer** *(coming next)* — scan a directory and auto-produce a starter workflow from package managers, config files, and build scripts
 
 ## Contributing
 
@@ -77,5 +80,3 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
 Pull requests are welcome. For major changes, open an issue first to discuss what you'd like to change.
-
-</div>
