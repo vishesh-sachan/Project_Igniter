@@ -1,122 +1,81 @@
-# Project Igniter
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-Project Igniter captures project setup processes and turns them into interactive installers, so contributors can get a project running with a single command instead of wading through lengthy documentation.
+<div style="font-family: 'JetBrains Mono', monospace; color: #f8f9fa; background: #0a0a0a; padding: 24px; border-radius: 12px; line-height: 1.7;">
 
-## How It Works
+# PROJECT<span style="color:#7cff6b">_</span>IGNITER
 
-Project Igniter is a desktop application that lets maintainers model their project's setup as a **visual workflow** composed of steps. Each step represents an action the user performs during setup — prompting for input, running commands, checking conditions, branching based on variables, etc.
+*Analyze your project · compose visual workflows · forge zero-dependency setup scripts*
 
-The workflow is persisted as JSON and can be executed by the runtime installer.
+<!--
+![Screenshot](assets/screenshot.png)
+-->
 
-## Workflow Architecture
+## Why does this exist?
 
-### Data Model
+Every open-source project has a setup process — install dependencies, configure environment variables, create config files, run migrations. Contributors waste hours navigating docs, hitting missing tools, and debugging half-run setup steps.
 
-A workflow is a **recursive tree** of steps. The top level contains an ordered list of steps, and certain step types contain nested sub-workflows for different execution branches.
+Project Igniter lets maintainers model that setup as a **visual workflow** and generate zero-dependency shell scripts from it. Contributors run a single command — `bash setup.sh` — and the script walks them through everything, skipping what's already done.
 
-```
-Workflow {
-  steps: Step[]          // ordered; array index determines execution order
-}
-```
+## Features
 
-Each step has a unique `id` (UUID), a `name`, and a `type` that determines its behavior and available properties.
-
-### Step Types
-
-| Type | Branches | Purpose |
-|---|---|---|
-| `input` | — | Prompt user for text input, store in a variable |
-| `information` | — | Display informational message |
-| `choice` | — | Multiple choice prompt |
-| `flow` | — | Control flow marker (`continue` acts as terminator in sub-workflows) |
-| `check` | `onSuccess`, `onFailure` | Validate a condition (command exit code, file existence, env var presence) |
-| `condition` | `onTrue`, `onFalse` | Branch based on a variable comparison |
-| `command` | `onSuccess`, `onFailure` | Execute a shell command |
-| `file` | `onSuccess`, `onFailure` | Create, append, or replace text in a file |
-| `osBranch` | `macos`, `linux`, `windows` | Branch based on the user's operating system |
-
-### Branching & Recursive Nesting
-
-Steps with branches (`check`, `condition`, `command`, `file`, `osBranch`) each contain nested `Workflow` objects. When a branch executes, its sub-workflow runs as a self-contained sequence of steps. This creates a tree structure:
-
-```
-Root Workflow
-├── Input: "Project name"
-├── Command: "npm install"
-│   ├── onSuccess
-│   │   ├── Information: "Installed successfully"
-│   │   └── Flow: continue
-│   └── onFailure
-│       └── Check: "Is Node installed?"
-│           ├── onSuccess → Command: "Install Node"
-│           └── onFailure → ...
-└── Flow: continue (only in sub-workflows)
-```
-
-#### Flow Step as Sentinel
-
-Every sub-workflow (branch) is initialized with a single `flow` step of type `continue` as the last item. This step acts as a **sentinel** — new steps added to the branch are inserted before it, and it cannot be reordered or deleted. The flow step ensures the sub-workflow returns control to the parent after execution.
-
-### Ordering
-
-- Steps within a workflow are **ordered by array index**.
-- The workflow editor supports **drag-to-reorder** within a branch via a grip handle (≡). Dragging is scoped to a single branch — you cannot drag steps across branches.
-- The `flow` step is always anchored at the bottom and excluded from reordering.
-
-### Persistence
-
-Workflows are saved as JSON files in `.project-igniter/workflows/<id>.json`. A separate index at `.project-igniter/workflows.json` tracks all workflows.
-
-### Generated Scripts
-
-When scripts are generated (via the "Generate Scripts" button), the converter produces:
-
-```
-<project-root>/
-├── setup.sh                          ← public entry point (committed to repo)
-├── setup.ps1                         ← public entry point (committed to repo)
-└── .project-igniter/
-    ├── setup.sh                      ← orchestrator (flag parsing, drift, routing)
-    ├── setup.ps1                     ← orchestrator
-    ├── workflows.json                ← index (schema, project defs, env refs)
-    ├── workflows/<id>.json           ← individual workflow models
-    └── scripts/<project>/<env>/
-        ├── setup.sh                  ← per-environment execution script
-        └── setup.ps1
-```
-
-No `chmod +x` is needed on any generated file — the chain uses `exec bash` and
-PowerShell's `&` invocation throughout.
-
-**Contributor workflow:**
-```bash
-git clone <repo>
-bash setup.sh              # prompts for inputs, runs setup steps
-# or with a one-time chmod:
-chmod +x setup.sh && ./setup.sh
-```
-
-## Tech Stack
-
-| Layer | Technology |
+| Area | What it does |
 |---|---|
-| Desktop Framework | Tauri v2 |
-| Frontend | React 19, TypeScript |
-| State Management | Zustand 5 |
-| Build Tool | Vite 7 |
-| Styling | Tailwind CSS 4 |
-| Drag & Drop | @dnd-kit/sortable |
-| Backend | Rust (Tauri commands) |
+| **Workflow Composer** | Visual tree editor — 9 step types, drag-to-reorder, recursive branching, 3-panel layout with context variables and property inspector |
+| **Script Forge** | Converts workflows into zero-dependency Bash and PowerShell scripts. No Node.js, no Tauri, no runtime — just native shell |
+| **Project Analyzer** | *(coming soon)* Scans your project and suggests a starter workflow from detected patterns |
+| **One-Command Setup** | `bash setup.sh` — nothing else required |
+| **Cross-Platform** | Generates both `setup.sh` (Bash) and `setup.ps1` (PowerShell) for every environment |
+| **Variables & Context** | Prompt for input once, reference it across all steps via `{{variable}}` interpolation |
+| **Recursive Branching** | Steps can nest sub-workflows — OS branches inside conditions inside checks, arbitrarily deep |
+| **State Persistence** | Tracks what's been installed across runs; skips completed steps automatically |
+| **Monorepo Support** | Manage workflows for multiple projects in a single repo with per-project standalone scripts |
 
-## Editor UI
+## Quick Demo
 
-The workflow editor is a 3-panel layout:
+```bash
+git clone <your-project>
+cd <your-project>
+bash setup.sh
+```
 
-- **Left**: Context variables panel — lists all variables referenced across steps
-- **Center**: Workflow tree — visual tree editor with drag-to-reorder, expand/collapse for branches, and an "Add Step" button
-- **Right**: Properties panel — form editor for the selected step's properties
+The script detects your platform, prompts for any required inputs, and runs the setup steps in order. If interrupted, re-running picks up where it left off.
 
-## Current Status
+## Installation
 
-Early development. Focus is on workflow modeling and the visual editor.
+> Early development — preview builds coming soon. [Star the repo](https://github.com/vishesh-sachan/Project_Igniter) to stay updated.
+
+## Roadmap
+
+See the full roadmap on the landing page: [project-igniter.nytkode.com/#roadmap](https://project-igniter.nytkode.com/#roadmap)
+
+High-level phases:
+
+1. **Workflow Composer** *(completed)* — visual tree editor for modeling setup with 9 step types, drag-to-reorder, and recursive branching
+2. **Script Forge Optimisation** *(in progress)* — cleaner generated scripts, better error handling, faster generation
+3. **Project Analyzer** *(coming next)* — scan a directory and auto-produce a starter workflow from package managers, config files, and build scripts
+
+## Contributing
+
+This repo is the Project Igniter desktop application (Tauri v2, React 19, TypeScript, Tailwind CSS 4).
+
+**macOS / Linux** — clone and run the setup script:
+
+```bash
+git clone https://github.com/vishesh-sachan/Project_Igniter
+cd project-installer
+bash setup.sh
+```
+
+**Windows** — clone and run the setup script:
+
+```powershell
+git clone https://github.com/vishesh-sachan/Project_Igniter
+cd project-installer
+powershell -ExecutionPolicy Bypass -File setup.ps1
+```
+
+Pull requests are welcome. For major changes, open an issue first to discuss what you'd like to change.
+
+</div>

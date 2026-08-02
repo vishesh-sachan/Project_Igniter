@@ -1,0 +1,47 @@
+{
+  "id": "194f96e8-f4d6-4960-9788-4de0a14f60d6",
+  "name": "Development",
+  "createdAt": "2026-08-02T03:50:01.524Z",
+  "updatedAt": "2026-08-02T03:50:26.595Z",
+  "steps": [
+    {
+      "id": "d13cbb57-b04e-4e79-b437-44a1374da019",
+      "type": "command",
+      "name": "Command",
+      "command": "bun run tauri dev",
+      "onSuccess": {
+        "id": "da190d35-9044-4791-9fa3-20862bd8a636",
+        "name": "sub-workflow",
+        "createdAt": "2026-08-02T03:50:10.803Z",
+        "updatedAt": "2026-08-02T03:50:10.803Z",
+        "steps": [
+          {
+            "id": "25fd6912-774e-4a8f-ad4f-764c683533ed",
+            "type": "flow",
+            "name": "Continue",
+            "flowType": {
+              "type": "continue"
+            }
+          }
+        ]
+      },
+      "onFailure": {
+        "id": "aba6cdad-7a7b-4c74-b703-365d545836af",
+        "name": "sub-workflow",
+        "createdAt": "2026-08-02T03:50:10.803Z",
+        "updatedAt": "2026-08-02T03:50:10.803Z",
+        "steps": [
+          {
+            "id": "32cbc7ea-d62c-42f9-9eaf-e30df0eea241",
+            "type": "flow",
+            "name": "Continue",
+            "flowType": {
+              "type": "continue"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "environment": "dev"
+}

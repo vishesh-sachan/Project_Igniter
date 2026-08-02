@@ -1,0 +1,21 @@
+{
+  "schema": 2,
+  "defaultProject": "root",
+  "standalone": [],
+  "projects": {
+    "root": {
+      "path": ".",
+      "defaultEnv": "dev",
+      "environments": {
+        "dev": {
+          "id": "194f96e8-f4d6-4960-9788-4de0a14f60d6",
+          "name": "Development",
+          "environment": "dev",
+          "createdAt": "2026-08-02T03:50:01.524Z",
+          "updatedAt": "2026-08-02T03:50:26.595Z"
+        }
+      },
+      "standalone": []
+    }
+  }
+}
