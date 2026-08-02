@@ -16,10 +16,18 @@ mkdir -p "${PROJECT_STATE}" 2>/dev/null
 load_state() { local v="$1"; local f="${PROJECT_STATE}/${v}"; [ -f "$f" ] && eval "${v}="$(cat "$f")""; }
 save_state() { local v="$1"; shift; echo "$*" > "${PROJECT_STATE}/${v}"; }
 
-NEXT="d13cbb57-b04e-4e79-b437-44a1374da019"
+NEXT="afce5c7a-f2c9-4e42-b7a5-52ef2f1138a8"
 
 while [ -n "$NEXT" ]; do
   case "$NEXT" in
+    afce5c7a-f2c9-4e42-b7a5-52ef2f1138a8)
+      bun i
+      if [ $? -eq 0 ]; then
+        NEXT="d13cbb57-b04e-4e79-b437-44a1374da019"
+      else
+        NEXT="d13cbb57-b04e-4e79-b437-44a1374da019"
+      fi
+      ;;
     d13cbb57-b04e-4e79-b437-44a1374da019)
       bun run tauri dev
       if [ $? -eq 0 ]; then

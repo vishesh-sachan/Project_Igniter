@@ -1,5 +1,5 @@
 {
-  "schema": 2,
+  "schema": 3,
   "defaultProject": "root",
   "standalone": [],
   "projects": {
@@ -12,7 +12,7 @@
           "name": "Development",
           "environment": "dev",
           "createdAt": "2026-08-02T03:50:01.524Z",
-          "updatedAt": "2026-08-02T03:50:26.595Z"
+          "updatedAt": "2026-08-02T06:13:58.220Z"
         }
       },
       "standalone": []

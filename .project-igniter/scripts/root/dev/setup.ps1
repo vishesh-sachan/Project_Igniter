@@ -21,10 +21,18 @@ function Save-State($v, $val) {
   $val | Out-File -FilePath (Join-Path $PROJECT_STATE $v) -Encoding UTF8
 }
 
-$NEXT = 'd13cbb57-b04e-4e79-b437-44a1374da019'
+$NEXT = 'afce5c7a-f2c9-4e42-b7a5-52ef2f1138a8'
 
 while ($NEXT) {
   switch ($NEXT) {
+    'afce5c7a-f2c9-4e42-b7a5-52ef2f1138a8') {
+      bun i
+      if ($LASTEXITCODE -eq 0) {
+        $NEXT = 'd13cbb57-b04e-4e79-b437-44a1374da019'
+      } else {
+        $NEXT = 'd13cbb57-b04e-4e79-b437-44a1374da019'
+      }
+    }
     'd13cbb57-b04e-4e79-b437-44a1374da019') {
       bun run tauri dev
       if ($LASTEXITCODE -eq 0) {

@@ -2,12 +2,50 @@
   "id": "194f96e8-f4d6-4960-9788-4de0a14f60d6",
   "name": "Development",
   "createdAt": "2026-08-02T03:50:01.524Z",
-  "updatedAt": "2026-08-02T03:50:26.595Z",
+  "updatedAt": "2026-08-02T06:13:58.220Z",
   "steps": [
+    {
+      "id": "afce5c7a-f2c9-4e42-b7a5-52ef2f1138a8",
+      "type": "command",
+      "name": "Bun Install",
+      "command": "bun i",
+      "onSuccess": {
+        "id": "1948d392-7b2c-42f1-a471-bd6424fddb5d",
+        "name": "sub-workflow",
+        "createdAt": "2026-08-02T06:13:34.675Z",
+        "updatedAt": "2026-08-02T06:13:34.675Z",
+        "steps": [
+          {
+            "id": "60ba96d1-92c7-40c8-8dbf-5918936b826d",
+            "type": "flow",
+            "name": "Continue",
+            "flowType": {
+              "type": "continue"
+            }
+          }
+        ]
+      },
+      "onFailure": {
+        "id": "00c73609-efe1-4231-b6c9-ce5bb36dfcfe",
+        "name": "sub-workflow",
+        "createdAt": "2026-08-02T06:13:34.675Z",
+        "updatedAt": "2026-08-02T06:13:34.675Z",
+        "steps": [
+          {
+            "id": "77e50958-329f-4b9b-9efe-6b7c3ed4be50",
+            "type": "flow",
+            "name": "Continue",
+            "flowType": {
+              "type": "continue"
+            }
+          }
+        ]
+      }
+    },
     {
       "id": "d13cbb57-b04e-4e79-b437-44a1374da019",
       "type": "command",
-      "name": "Command",
+      "name": "Run dev",
       "command": "bun run tauri dev",
       "onSuccess": {
         "id": "da190d35-9044-4791-9fa3-20862bd8a636",
