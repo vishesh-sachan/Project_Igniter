@@ -5,7 +5,7 @@ Project Igniter is a Tauri v2 desktop app: React 19, TypeScript, Tailwind CSS 4,
 ## Prerequisites
 
 - **Rust toolchain** (stable) — required to run the desktop app: <https://rustup.rs>
-- **Node / npm** — for the frontend toolchain and Vite.
+- **Bun** — package manager and runtime: <https://bun.sh>
 
 ## Dogfooding note
 
@@ -16,11 +16,11 @@ Project Igniter bootstraps its **own** repo. The `setup.sh` / `setup.ps1` at the
 ```bash
 git clone https://github.com/<you>/project-installer
 cd project-installer
-npm install
-npm run tauri dev
+bun install
+bun run tauri dev
 ```
 
-`npm run tauri dev` compiles the Rust side on first start, then serves the Vite frontend. The app opens a native desktop window.
+`bun run tauri dev` compiles the Rust side on first start, then serves the Vite frontend. The app opens a native desktop window.
 
 ## Where things live
 
@@ -50,7 +50,7 @@ npm run tauri dev
 ## Build / typecheck
 
 ```bash
-npm run build    # tsc && vite build
+bun run build    # tsc && vite build
 ```
 
 Follow the existing 2-space indent and use `type` imports for types.
@@ -59,7 +59,7 @@ Follow the existing 2-space indent and use `type` imports for types.
 
 1. Branch: `git checkout -b feat/your-change`.
 2. Keep the data path consistent: model → converter → orchestrator.
-3. Verify with `npm run build`, then generate scripts and run `bash setup.sh` in a scratch project to confirm the emitted code.
+3. Verify with `bun run build`, then generate scripts and run `bash setup.sh` in a scratch project to confirm the emitted code.
 4. Open a PR; it will run typecheck.
 
 For schema-level or converter-shaping changes, open an issue first to discuss migration impact.

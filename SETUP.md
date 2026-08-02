@@ -8,12 +8,12 @@
 # Linux / macOS — three ways:
 bash setup.sh
 ./setup.sh
-npm run setup
+bun run setup
 
 # Windows PowerShell:
 powershell -ExecutionPolicy Bypass ./setup.ps1
 # or:
-npm run setup:ps
+bun run setup:ps
 ```
 
 The script will:
