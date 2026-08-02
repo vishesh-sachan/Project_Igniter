@@ -4,6 +4,12 @@
 
 <p align="center"><em>Analyze your project · compose visual workflows · forge zero-dependency setup scripts</em></p>
 
+<p align="center">
+  <a href="#license">
+    <img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-green?style=flat-square" />
+  </a>
+</p>
+
 <table>
   <tr>
     <td><img src="assets/screenshots/project selection page.png" alt="Project selection" width="100%"></td>
@@ -88,3 +94,7 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
 Pull requests are welcome. For major changes, open an issue first to discuss what you'd like to change.
+
+## License
+
+Released under the [Apache License 2.0](LICENSE).
