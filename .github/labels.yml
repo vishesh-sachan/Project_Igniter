@@ -1,0 +1,54 @@
+# Label definitions for Project Igniter
+# Sync them with:
+#   npx github-label-sync --labels labels.yml vishesh-sachan/Project_Igniter
+- name: bug
+  color: d73a4a
+  description: Something isn't working as expected
+- name: enhancement
+  color: a2eeef
+  description: New feature or improvement
+- name: documentation
+  color: 0075ca
+  description: Docs, guides, or comments
+- name: converter
+  color: 0e8a16
+  description: Script Forge / generated scripts (Bash/PowerShell)
+- name: composer
+  color: c5def5
+  description: Workflow Composer editor UI
+- name: monorepo
+  color: 1d76db
+  description: Projects, environments, and workspace scoping
+- name: analyzer
+  color: e4e669
+  description: Project Analyzer
+- name: tauri
+  color: bfd4f2
+  description: Rust backend / Tauri shell
+- name: good first issue
+  color: 7057ff
+  description: Good for newcomers
+- name: help wanted
+  color: 008672
+  description: Maintainers would like help with this
+- name: needs triage
+  color: fbca04
+  description: New issue, not yet reviewed
+- name: priority-high
+  color: b60205
+  description: Should be fixed/landed soon
+- name: priority-low
+  color: ffffff
+  description: Nice to have, no rush
+- name: wontfix
+  color: cccccc
+  description: Won't be worked on
+- name: duplicate
+  color: cfd3d7
+  description: Duplicate of another issue
+- name: invalid
+  color: e4e669
+  description: Doesn't apply / not a valid report
+- name: stale
+  color: 5319e7
+  description: No activity in a while

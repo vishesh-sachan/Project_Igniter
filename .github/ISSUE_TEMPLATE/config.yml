@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Project Igniter roadmap
+    url: https://project-igniter.nytkode.com/#roadmap
+    about: See what's planned before opening a feature request.
+  - name: Project Igniter documentation
+    url: https://github.com/vishesh-sachan/Project_Igniter/blob/main/docs/README.md
+    about: Architecture, guides, and references.
