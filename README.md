@@ -4,9 +4,13 @@
 
 <p align="center"><em>Analyze your project · compose visual workflows · forge zero-dependency setup scripts</em></p>
 
-<!--
-![Screenshot](assets/screenshot.png)
--->
+<table>
+  <tr>
+    <td><img src="assets/screenshots/project selection page.png" alt="Project selection" width="100%"></td>
+    <td><img src="assets/screenshots/project overview page.png" alt="Project overview" width="100%"></td>
+    <td><img src="assets/screenshots/workflow composer.png" alt="Workflow composer" width="100%"></td>
+  </tr>
+</table>
 
 ## Why does this exist?
 
