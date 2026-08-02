@@ -75,7 +75,7 @@ See the full [roadmap on the landing page](https://project-igniter.nytkode.com/#
 
 ## Contributing
 
-This repo is the Project Igniter desktop application (Tauri v2, React 19, TypeScript, Tailwind CSS 4).
+This repo is the Project Igniter desktop application (Tauri v2, React 19, TypeScript, Tailwind CSS 4). See [CONTRIBUTING.md](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 **macOS / Linux** — clone and run the setup script:
 
