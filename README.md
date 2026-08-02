@@ -55,6 +55,10 @@ bash setup.sh
 
 This runs the setup workflow for Project Igniter itself, launching the desktop app so you can model workflows and generate scripts for your project.
 
+## Documentation
+
+See the [docs](docs/README.md) for architecture, guides, references, and patterns. Start with the [architecture overview](docs/architecture.md) or [authoring a workflow](docs/guides/02-authoring-a-workflow.md).
+
 ## Roadmap
 
 See the full [roadmap on the landing page](https://project-igniter.nytkode.com/#roadmap)
